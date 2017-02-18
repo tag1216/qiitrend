@@ -6,4 +6,5 @@ node_modules
 .idea
 db.sqlite3
 staticfiles
+.env
 

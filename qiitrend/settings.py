@@ -1,6 +1,7 @@
 import os
 
 import dj_database_url
+from datetime import date
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -22,6 +23,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'webpack_loader',
     'admin_honeypot',
+    'rest_framework',
+    'social_django',
     'core',
 ]
 
@@ -48,6 +51,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
             ],
         },
     },
@@ -110,6 +115,10 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # Allow all host headers
 ALLOWED_HOSTS = ['*']
 
+
+########################################
+# staticファイル
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
@@ -136,3 +145,37 @@ WEBPACK_LOADER = {
 #         'BUNDLE_DIR_NAME': 'dist/',
 #         'STATS_FILE': os.path.join(BASE_DIR, 'webpack-stats-prod.json')
 #     })
+
+
+########################################
+# 認証設定
+
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.qiita.QiitaOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+)
+SOCIAL_AUTH_QIITA_KEY = os.environ.get('SOCIAL_AUTH_QIITA_KEY')
+SOCIAL_AUTH_QIITA_SECRET = os.environ.get('SOCIAL_AUTH_QIITA_SECRET')
+SOCIAL_AUTH_QIITA_SCOPE = ['read_qiita']
+
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
+
+REST_FRAMEWORK = {
+    'DEFAULT_THROTTLE_CLASSES': (
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ),
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '3/min',
+        'user': '3/sec'
+    }
+}
+
+
+########################################
+# Qiitaトレンド
+
+QIITA_MIN_DATE = date(2011, 9, 15)
+COUNT_CACHE_EXPIRE = 24 * 60 * 60
+LAST_COUNT_CACHE_EXPIRE = 60 * 60

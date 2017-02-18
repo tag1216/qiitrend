@@ -22,5 +22,6 @@ from django.contrib import admin
 urlpatterns = [
     url(r'^admin/', include('admin_honeypot.urls', namespace='admin_honeypot')),
     url(r'^{}'.format(os.environ.get('ADMIN_URL', 'adminsite/')), admin.site.urls),
+    url('', include('social.apps.django_app.urls', namespace='social')),
     url(r'', include('core.urls')),
 ]

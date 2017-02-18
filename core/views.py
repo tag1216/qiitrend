@@ -2,8 +2,8 @@ import copy
 import http
 import json
 import logging
-import os
 import re
+from concurrent.futures.thread import ThreadPoolExecutor
 from datetime import date, datetime
 from operator import itemgetter
 from typing import List, Dict
@@ -18,6 +18,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from rest_framework import permissions
+from rest_framework.status import HTTP_202_ACCEPTED
 from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from rest_framework.views import APIView
 from social_django.models import UserSocialAuth
@@ -59,6 +60,11 @@ class ProfileView(APIView):
         json_content = json.dumps(response.json())
 
         return HttpResponse(json_content, content_type="application/json")
+
+
+class TestView(APIView):
+    def get(self, request):
+        return HttpResponse(json.dumps({}), status=HTTP_202_ACCEPTED)
 
 
 class ItemCountsView(APIView):
@@ -128,11 +134,14 @@ def _split_and(x: str) -> List[str]:
     return sorted(re.split("[\s]+", x.strip()))
 
 
+executor = ThreadPoolExecutor(max_workers=10)
+
+
 def get_item_counts(query: str, unit: Unit, first: date, last: date) -> List[Dict]:
 
     query = parse_query(query)
 
-    redis_client = redis.from_url(os.environ.get("REDIS_URL", "redis://localhost:6379"))
+    redis_client = redis.from_url(settings.REDIS_URL, settings.REDIS_DB_ITEM_COUNT)
 
     counts = {}
 
@@ -141,22 +150,16 @@ def get_item_counts(query: str, unit: Unit, first: date, last: date) -> List[Dic
         d = dt.date()
         query_with_date = query + ("created:" + unit.format(d))
 
-        key = "count:{}{}:{}".format(
-            unit.short_name,
-            unit.short_format(d),
-            query.query
-        )
+        key = make_key(query, unit, d)
 
         cnt = redis_client.get(key)
         cnt = int(cnt) if cnt is not None else None
 
         if cnt is None:
-            cnt = request_item_count(query_with_date)
-            if unit.delta(date.today(), d) != 0:
-                expire = settings.COUNT_CACHE_EXPIRE
-            else:
-                expire = settings.LAST_COUNT_CACHE_EXPIRE
-            redis_client.setex(key, cnt, expire)
+            request_queue_db = redis.from_url(settings.REDIS_URL, settings.REDIS_DB_REQUEST_QUEUE)
+            if not request_queue_db.exists(key):
+                request_queue_db.set(key, "")
+                executor.submit(async_request, query, unit, d)
 
         item_count = dict(query=query_with_date,
                           unit=unit.name,
@@ -172,6 +175,24 @@ def get_item_counts(query: str, unit: Unit, first: date, last: date) -> List[Dic
     return counts
 
 
+def async_request(query: QiitaSearchQuery, unit: Unit, d: date):
+
+    key = make_key(query, unit, d)
+
+    query_with_date = query + ("created:" + unit.format(d))
+    cnt = request_item_count(query_with_date)
+    if unit.delta(date.today(), d) != 0:
+        expire = settings.COUNT_CACHE_EXPIRE
+    else:
+        expire = settings.LAST_COUNT_CACHE_EXPIRE
+
+    item_count_db = redis.from_url(settings.REDIS_URL, settings.REDIS_DB_ITEM_COUNT)
+    item_count_db.setex(key, cnt, expire)
+
+    request_queue_db = redis.from_url(settings.REDIS_URL, settings.REDIS_DB_REQUEST_QUEUE)
+    request_queue_db.delete(key)
+
+
 def request_item_count(query: QiitaSearchQuery=None) -> int:
 
     logger.info("request: q={}".format(query.query))
@@ -184,3 +205,13 @@ def request_item_count(query: QiitaSearchQuery=None) -> int:
     total_count = int(soup.select(".searchResultContainer_navigation a > span")[0].string)
 
     return total_count
+
+
+def make_key(query: QiitaSearchQuery, unit: Unit, d: date):
+    return "count:{}{}:{}".format(
+        unit.short_name,
+        unit.short_format(d),
+        query.query
+    )
+
+

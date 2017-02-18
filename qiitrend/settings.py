@@ -172,6 +172,13 @@ REST_FRAMEWORK = {
     }
 }
 
+########################################
+# Redis
+
+REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379")
+REDIS_DB_ITEM_COUNT = 0
+REDIS_DB_REQUEST_QUEUE = 1
+REDIS_STATS = 2
 
 ########################################
 # Qiitaトレンド

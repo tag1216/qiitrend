@@ -1,6 +1,7 @@
 import http
 import json
 import logging
+import re
 from datetime import date, datetime
 from operator import attrgetter
 
@@ -12,7 +13,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from rest_framework import permissions
 from rest_framework.decorators import api_view
-from rest_framework.exceptions import APIException, NotFound
+from rest_framework.exceptions import APIException, NotFound, ParseError
 from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from rest_framework.views import APIView
 from social_django.models import UserSocialAuth
@@ -71,6 +72,56 @@ class ProfileView(APIView):
 
 
 class ItemCountsView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request):
+
+        try:
+            unit = request.GET.get("unit")
+            if unit is None:
+                raise ParseError("parameter unit is required.")
+            if not hasattr(Unit, unit):
+                raise ParseError("parameter unit is not valid.")
+            unit = Unit[unit]
+
+            today = date.today()
+            last = unit.truncate(today)
+
+            period = request.GET.get("period")
+            if period and not re.match(r"[0-9]+", period):
+                raise ParseError("parameter period is not valid.")
+            if period:
+                first = last - unit.relativedelta(int(period) - 1)
+            else:
+                first = unit.truncate(settings.QIITA_MIN_DATE)
+
+            item_counts = []
+
+            queries = request.GET.getlist("query")
+            for query_raw in queries:
+
+                query = QiitaSearchQuery.parse(query_raw)
+
+                for d in unit.iterate(first, last):
+                    query_with_date = query + ("created:" + unit.format(d))
+                    item_count = ItemCountCacheClient().get(query, unit, d)
+
+                    item_counts.append(dict(query_raw=query_raw,
+                                            query=query_with_date.query,
+                                            date=unit.format(item_count.date),
+                                            count=item_count.count))
+
+            return HttpResponse(json.dumps(item_counts),
+                                content_type="application/json")
+
+        except APIException as e:
+            raise e
+        except Exception as e:
+            logger.exception(e)
+            raise APIException("System Error")
+
+
+class ItemCountListView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, query, unit):

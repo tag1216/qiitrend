@@ -11,6 +11,8 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from rest_framework import permissions
+from rest_framework.decorators import api_view
+from rest_framework.exceptions import APIException, NotFound
 from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from rest_framework.views import APIView
 from social_django.models import UserSocialAuth
@@ -25,6 +27,11 @@ def index(request):
     return render(request, 'core/index.html')
 
 
+@api_view(["GET", "POST"])
+def not_found(request):
+    raise NotFound()
+
+
 class LoginView(APIView):
     throttle_classes = (AnonRateThrottle, UserRateThrottle,)
 
@@ -36,78 +43,96 @@ class LoginView(APIView):
 class LogoutView(APIView):
 
     def get(self, request):
-        auth.logout(request)
-        return redirect("/")
+        try:
+            auth.logout(request)
+            return redirect("/")
+        except Exception as e:
+            logger.exception(e)
+            raise APIException("System Error")
 
 
 class ProfileView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request):
-        social_user = UserSocialAuth.objects.get(user=request.user)
-        access_token = social_user.extra_data["access_token"]
-        headers = dict(Authorization="Bearer {}".format(access_token))
-        response = requests.get("https://qiita.com/api/v2/authenticated_user/", headers=headers)
-        if response.status_code != http.HTTPStatus.OK:
-            raise Exception()
-        json_content = json.dumps(response.json())
+        try:
+            social_user = UserSocialAuth.objects.get(user=request.user)
+            access_token = social_user.extra_data["access_token"]
+            headers = dict(Authorization="Bearer {}".format(access_token))
+            response = requests.get("https://qiita.com/api/v2/authenticated_user/", headers=headers)
+            if response.status_code != http.HTTPStatus.OK:
+                raise Exception()
+            json_content = json.dumps(response.json())
 
-        return HttpResponse(json_content, content_type="application/json")
+            return HttpResponse(json_content, content_type="application/json")
+        except Exception as e:
+            logger.exception(e)
+            raise APIException("System Error")
 
 
 class ItemCountsView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, query, unit):
-        unit = Unit[unit]
-        period = request.GET.get("period")
+        try:
+            unit = Unit[unit]
+            period = request.GET.get("period")
 
-        today = date.today()
-        last = unit.truncate(today)
+            today = date.today()
+            last = unit.truncate(today)
 
-        if period:
-            first = last - unit.relativedelta(int(period) - 1)
-        else:
-            first = unit.truncate(settings.QIITA_MIN_DATE)
+            if period:
+                first = last - unit.relativedelta(int(period) - 1)
+            else:
+                first = unit.truncate(settings.QIITA_MIN_DATE)
 
-        query = QiitaSearchQuery.parse(query)
+            query = QiitaSearchQuery.parse(query)
 
-        item_counts = {}
+            item_counts = {}
 
-        for d in unit.iterate(first, last):
-            query_with_date = query + ("created:" + unit.format(d))
+            for d in unit.iterate(first, last):
+                query_with_date = query + ("created:" + unit.format(d))
 
-            item_count = ItemCountCacheClient().get(query, unit, d)
+                item_count = ItemCountCacheClient().get(query, unit, d)
 
-            item_counts[d] = item_count
+                item_counts[d] = item_count
 
-        item_counts = sorted(item_counts.values(),
-                             key=attrgetter("date"),
-                             reverse=True)
+            item_counts = sorted(item_counts.values(),
+                                 key=attrgetter("date"),
+                                 reverse=True)
 
-        json_content = json.dumps([
-            dict(query=c.query.query,
-                 date=unit.format(c.date),
-                 count=c.count)
-            for c in reversed(item_counts)
-        ])
+            json_content = json.dumps([
+                dict(query=c.query.query,
+                     date=unit.format(c.date),
+                     count=c.count)
+                for c in reversed(item_counts)
+            ])
 
-        return HttpResponse(json_content, content_type="application/json")
+            return HttpResponse(json_content, content_type="application/json")
+
+        except Exception as e:
+            logger.exception(e)
+            raise APIException("System Error")
 
 
 class ItemCountView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, query, unit, d):
-        unit = Unit[unit]
-        d = datetime.strptime(d, unit.format_pattern)
+        try:
+            unit = Unit[unit]
+            d = datetime.strptime(d, unit.format_pattern)
 
-        item_count = ItemCountCacheClient().get(query, unit, d)
+            item_count = ItemCountCacheClient().get(query, unit, d)
 
-        json_content = json.dumps(
-            dict(query=item_count.query.query,
-                 date=item_count.unit.format(item_count.date),
-                 count=item_count.count)
-        )
+            json_content = json.dumps(
+                dict(query=item_count.query.query,
+                     date=item_count.unit.format(item_count.date),
+                     count=item_count.count)
+            )
 
-        return HttpResponse(json_content, content_type="application/json")
+            return HttpResponse(json_content, content_type="application/json")
+
+        except Exception as e:
+            logger.exception(e)
+            raise APIException("System Error")

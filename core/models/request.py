@@ -11,10 +11,10 @@ logger = logging.getLogger(__name__)
 
 def request_item_count(query: QiitaSearchQuery =None) -> int:
 
-    logger.info("request: q={}".format(query.query))
     response = requests.get("http://qiita.com/search", params=dict(q=query.query))
 
     if response.status_code != 200:
+        logger.warning("status code:{}".format(response.status_code))
         raise Exception()
 
     soup = BeautifulSoup(response.text, "html.parser")

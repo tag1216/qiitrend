@@ -1,12 +1,17 @@
+import logging
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date
 
 import redis
+import time
 from django.conf import settings
 
 from . import QiitaSearchQuery, Unit
 from .request import request_item_count
+
+
+logger = logging.getLogger(__name__)
 
 
 class ItemCount:
@@ -29,9 +34,10 @@ class ItemCountCacheClient:
         return cls._instance
 
     def __init__(self):
-        self.cache = redis.from_url(settings.REDIS_URL, settings.REDIS_DB_ITEM_COUNT)
-        self.request_queue = redis.from_url(settings.REDIS_URL, settings.REDIS_DB_REQUEST_QUEUE)
-        self.executor = ThreadPoolExecutor(max_workers=10)
+        if not hasattr(self, "executor"):
+            self.cache = redis.from_url(settings.REDIS_URL, settings.REDIS_DB_ITEM_COUNT)
+            self.request_queue = redis.from_url(settings.REDIS_URL, settings.REDIS_DB_REQUEST_QUEUE)
+            self.executor = ThreadPoolExecutor(max_workers=10)
 
     def get(self, query: QiitaSearchQuery, unit: Unit, d: date) -> ItemCount:
         key = self.make_key(query, unit, d)
@@ -57,13 +63,30 @@ class ItemCountCacheClient:
 
 def _async_request(key: str, query: QiitaSearchQuery, unit: Unit, d: date):
 
-    query_with_date = query + ("created:" + unit.format(d))
-    cnt = request_item_count(query_with_date)
-    if unit.delta(date.today(), d) != 0:
-        expire = settings.COUNT_CACHE_EXPIRE
-    else:
-        expire = settings.LAST_COUNT_CACHE_EXPIRE
+    start = time.time()
 
-    cache_client = ItemCountCacheClient()
-    cache_client.cache.setex(key, cnt, expire)
-    cache_client.request_queue.delete(key)
+    try:
+        query_with_date = query + ("created:" + unit.format(d))
+
+        cnt = request_item_count(query_with_date)
+
+        response_time = time.time() - start
+        logger.info("q:{} response time:{:.3f}"
+                    .format(query_with_date.query, response_time))
+
+        if unit.delta(date.today(), d) != 0:
+            expire = settings.COUNT_CACHE_EXPIRE
+        else:
+            expire = settings.LAST_COUNT_CACHE_EXPIRE
+
+        cache_client = ItemCountCacheClient()
+        cache_client.cache.setex(key, cnt, expire)
+        cache_client.request_queue.delete(key)
+
+    except Exception:
+        logger.exception("qiita request failed.")
+
+    elapsed_time = time.time() - start
+    time_per_request = 1.0 / settings.QIITA_REQUEST_PER_SECOND
+    if elapsed_time < time_per_request:
+        time.sleep(time_per_request - elapsed_time)

@@ -219,3 +219,8 @@ COUNT_CACHE_EXPIRE = 24 * 60 * 60
 LAST_COUNT_CACHE_EXPIRE = 60 * 60
 
 QIITA_REQUEST_PER_SECOND = 1.0
+
+########################################
+# Admin
+
+ADMIN_URL = os.environ.get('ADMIN_URL', 'adminsite/')

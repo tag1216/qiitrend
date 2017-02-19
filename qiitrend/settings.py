@@ -117,6 +117,37 @@ ALLOWED_HOSTS = ['*']
 
 
 ########################################
+# Log設定
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'default': {
+            'format': '[%(levelname)s] [%(asctime)s] [%(threadName)s] [%(name)s] %(message)s'
+        }
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'default',
+        },
+    },
+    'loggers': {
+        # 'django.db.backends': {
+        #     'handlers': ['console'],
+        #     'level': 'DEBUG',
+        # },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    }
+}
+
+
+########################################
 # staticファイル
 
 # Static files (CSS, JavaScript, Images)

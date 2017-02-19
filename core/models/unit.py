@@ -1,20 +1,23 @@
 from datetime import date
 from enum import Enum
 
+from dateutil import rrule
 from dateutil.relativedelta import relativedelta
 
 
 class Unit(Enum):
-    yearly = ("Y", "%Y", "%Y",
+    yearly = (rrule.YEARLY, "Y", "%Y", "%Y",
               lambda d: date(d.year, 1, 1),
               lambda d: d.years,
               lambda d: relativedelta(years=int(d)),)
-    monthly = ("M", "%Y%m", "%Y-%m",
+    monthly = (rrule.MONTHLY, "M", "%Y%m", "%Y-%m",
                lambda d: date(d.year, d.month, 1),
                lambda d: d.years * 12 + d.months,
                lambda d: relativedelta(months=int(d)),)
 
-    def __init__(self, short_name, short_format_pattern, format_pattern, truncate_func, delta_func, relativedelta):
+    def __init__(self, rrule_unit, short_name, short_format_pattern, format_pattern,
+                 truncate_func, delta_func, relativedelta):
+        self.rrule_unit = rrule_unit
         self.short_name = short_name
         self.short_format_pattern = short_format_pattern
         self.truncate_func = truncate_func
@@ -35,8 +38,11 @@ class Unit(Enum):
         delta = relativedelta(d1, d2)
         return self.delta_func(delta)
 
-    def relativedelta(self, d: int) -> relativedelta:
-        pass
+    def iterate(self, first: date, last: date):
+        for dt in rrule.rrule(freq=self.rrule_unit,
+                              dtstart=self.truncate(first),
+                              until=self.truncate(last)):
+            yield dt.date()
 
     @classmethod
     def choices(cls):

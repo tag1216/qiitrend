@@ -34,7 +34,7 @@ def not_found(request):
 
 
 class LoginView(APIView):
-    throttle_classes = (AnonRateThrottle, UserRateThrottle,)
+    throttle_scope = 'accounts'
 
     def get(self, request):
         redirect_url = reverse("social:begin", args=("qiita",))
@@ -42,6 +42,7 @@ class LoginView(APIView):
 
 
 class LogoutView(APIView):
+    throttle_scope = 'accounts'
 
     def get(self, request):
         try:
@@ -56,6 +57,7 @@ class LogoutView(APIView):
 
 class ProfileView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
+    throttle_scope = 'accounts'
 
     def get(self, request):
         try:
@@ -78,7 +80,7 @@ class ProfileView(APIView):
 
 
 class ItemCountsView(APIView):
-    permission_classes = (permissions.IsAuthenticated,)
+    throttle_classes = (AnonRateThrottle, UserRateThrottle,)
 
     def get(self, request):
 
@@ -128,7 +130,7 @@ class ItemCountsView(APIView):
 
 
 class ItemCountListView(APIView):
-    permission_classes = (permissions.IsAuthenticated,)
+    throttle_classes = (AnonRateThrottle, UserRateThrottle,)
 
     def get(self, request, query, unit):
         try:
@@ -175,7 +177,7 @@ class ItemCountListView(APIView):
 
 
 class ItemCountView(APIView):
-    permission_classes = (permissions.IsAuthenticated,)
+    throttle_classes = (AnonRateThrottle, UserRateThrottle,)
 
     def get(self, request, query, unit, d):
         try:

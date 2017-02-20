@@ -13,7 +13,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from rest_framework import permissions
 from rest_framework.decorators import api_view
-from rest_framework.exceptions import APIException, NotFound, ParseError
+from rest_framework.exceptions import APIException, NotFound, ParseError, NotAuthenticated
 from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from rest_framework.views import APIView
 from social_django.models import UserSocialAuth
@@ -47,6 +47,8 @@ class LogoutView(APIView):
         try:
             auth.logout(request)
             return redirect("/")
+        except APIException as e:
+            raise e
         except Exception as e:
             logger.exception(e)
             raise APIException("System Error")
@@ -66,6 +68,10 @@ class ProfileView(APIView):
             json_content = json.dumps(response.json())
 
             return HttpResponse(json_content, content_type="application/json")
+        except APIException as e:
+            raise e
+        except UserSocialAuth.DoesNotExist:
+            raise NotAuthenticated()
         except Exception as e:
             logger.exception(e)
             raise APIException("System Error")
@@ -161,6 +167,8 @@ class ItemCountListView(APIView):
 
             return HttpResponse(json_content, content_type="application/json")
 
+        except APIException as e:
+            raise e
         except Exception as e:
             logger.exception(e)
             raise APIException("System Error")
@@ -184,6 +192,8 @@ class ItemCountView(APIView):
 
             return HttpResponse(json_content, content_type="application/json")
 
+        except APIException as e:
+            raise e
         except Exception as e:
             logger.exception(e)
             raise APIException("System Error")

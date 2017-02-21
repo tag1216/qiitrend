@@ -1,9 +1,7 @@
-html, body{
-  padding: 0
+html, body {
+  margin: 0;
+  padding: 0;
   height: auto;
   width: auto;
-}
-
-.center{
-  text-align: center;
+  font-family: sans-serif;
 }

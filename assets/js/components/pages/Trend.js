@@ -2,6 +2,8 @@ import React, { Component } from "react";
 
 import QueryField from "../QueryField";
 import QueryChip from "../QueryChip";
+import PeriodField from "../PeriodField";
+import ModeField from "../ModeField";
 import { COLORS } from "../../colors";
 
 class Trend extends Component {
@@ -20,6 +22,19 @@ class Trend extends Component {
             />
           ))}
         </div>
+        <span className="App-option">
+          <PeriodField
+            items={this.props.periodItems}
+            value={this.props.period}
+            onChange={this.props.onChangePeriod}
+          />
+        </span>
+        <span className="App-option">
+          <ModeField
+            value={this.props.mode}
+            onChange={this.props.onChangeMode}
+          />
+        </span>
       </div>
     );
   }

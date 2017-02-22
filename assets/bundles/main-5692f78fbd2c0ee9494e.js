@@ -76,7 +76,7 @@
 
 	var _Trend2 = _interopRequireDefault(_Trend);
 
-	var _NotFound = __webpack_require__(621);
+	var _NotFound = __webpack_require__(623);
 
 	var _NotFound2 = _interopRequireDefault(_NotFound);
 
@@ -34407,10 +34407,6 @@
 
 	var _url2 = _interopRequireDefault(_url);
 
-	var _querystring = __webpack_require__(391);
-
-	var _querystring2 = _interopRequireDefault(_querystring);
-
 	var _Header = __webpack_require__(394);
 
 	var _Header2 = _interopRequireDefault(_Header);
@@ -34422,6 +34418,8 @@
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var periodItems = [{ label: '過去3ヶ月', unit: 'monthly', period: 4 }, { label: '過去12ヶ月', unit: 'monthly', period: 13 }, { label: '過去24ヶ月', unit: 'monthly', period: 25 }, { label: '過去3年', unit: 'yearly', period: 4 }, { label: '過去5年', unit: 'yearly', period: 6 }, { label: '全期間(2011-)', unit: 'yearly', period: 'all' }];
 
 	var App = function (_Component) {
 	  _inherits(App, _Component);
@@ -34438,7 +34436,10 @@
 	    }
 
 	    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = App.__proto__ || Object.getPrototypeOf(App)).call.apply(_ref, [this].concat(args))), _this), _this.state = {
-	      queries: []
+	      periodItems: periodItems,
+	      queries: [],
+	      period: periodItems[3],
+	      mode: "count"
 	    }, _temp), _possibleConstructorReturn(_this, _ret);
 	  }
 
@@ -34459,7 +34460,11 @@
 	      var props = {
 	        queries: (!urlQuery.query ? [] : typeof urlQuery.query == "string" ? [urlQuery.query] : urlQuery.query).map(function (value) {
 	          return { value: value };
-	        })
+	        }),
+	        period: periodItems.find(function (p) {
+	          return p.unit === urlQuery.unit && "" + p.period === urlQuery.period;
+	        }) || periodItems[3],
+	        mode: urlQuery.mode || "count"
 	      };
 	      this.setState(_extends({}, props));
 	    }
@@ -34468,7 +34473,9 @@
 	    value: function render() {
 	      var childProps = _extends({}, this.state, {
 	        onAddQuery: this.onAddQuery.bind(this),
-	        onRemoveQuery: this.onRemoveQuery.bind(this)
+	        onRemoveQuery: this.onRemoveQuery.bind(this),
+	        onChangePeriod: this.onChangePeriod.bind(this),
+	        onChangeMode: this.onChangeMode.bind(this)
 	      });
 
 	      return _react2.default.createElement(
@@ -34485,28 +34492,39 @@
 	  }, {
 	    key: "onAddQuery",
 	    value: function onAddQuery(query) {
-	      var queries = this.state.queries.concat([{ value: query }]).map(function (q) {
-	        return q.value;
-	      });
-	      this.context.router.push({
-	        pathname: "/trend",
-	        query: {
-	          query: queries
-	        }
-	      });
+	      var queries = this.state.queries.concat([{ value: query }]);
+	      this.pushState(queries, this.state.period, this.state.mode);
 	    }
 	  }, {
 	    key: "onRemoveQuery",
 	    value: function onRemoveQuery(query) {
 	      var queries = this.state.queries.filter(function (q) {
 	        return q !== query;
-	      }).map(function (query) {
-	        return query.value;
 	      });
+	      this.pushState(queries, this.state.period, this.state.mode);
+	    }
+	  }, {
+	    key: "onChangePeriod",
+	    value: function onChangePeriod(period) {
+	      this.pushState(this.state.queries, period, this.state.mode);
+	    }
+	  }, {
+	    key: "onChangeMode",
+	    value: function onChangeMode(mode) {
+	      this.pushState(this.state.queries, this.state.period, mode);
+	    }
+	  }, {
+	    key: "pushState",
+	    value: function pushState(queries, period, mode) {
 	      this.context.router.push({
 	        pathname: "/trend",
 	        query: {
-	          query: queries
+	          query: queries.map(function (query) {
+	            return query.value;
+	          }),
+	          unit: period.unit,
+	          period: period.period,
+	          mode: mode
 	        }
 	      });
 	    }
@@ -68568,7 +68586,15 @@
 
 	var _QueryChip2 = _interopRequireDefault(_QueryChip);
 
-	var _colors = __webpack_require__(620);
+	var _PeriodField = __webpack_require__(620);
+
+	var _PeriodField2 = _interopRequireDefault(_PeriodField);
+
+	var _ModeField = __webpack_require__(621);
+
+	var _ModeField2 = _interopRequireDefault(_ModeField);
+
+	var _colors = __webpack_require__(622);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -68609,6 +68635,23 @@
 	              color: (0, _colors.COLORS)(i),
 	              onRequestDelete: _this2.props.onRemoveQuery
 	            });
+	          })
+	        ),
+	        _react2.default.createElement(
+	          "span",
+	          { className: "App-option" },
+	          _react2.default.createElement(_PeriodField2.default, {
+	            items: this.props.periodItems,
+	            value: this.props.period,
+	            onChange: this.props.onChangePeriod
+	          })
+	        ),
+	        _react2.default.createElement(
+	          "span",
+	          { className: "App-option" },
+	          _react2.default.createElement(_ModeField2.default, {
+	            value: this.props.mode,
+	            onChange: this.props.onChangeMode
 	          })
 	        )
 	      );
@@ -68700,6 +68743,127 @@
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _materialUi = __webpack_require__(395);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var PeriodField = function (_Component) {
+	  _inherits(PeriodField, _Component);
+
+	  function PeriodField() {
+	    _classCallCheck(this, PeriodField);
+
+	    return _possibleConstructorReturn(this, (PeriodField.__proto__ || Object.getPrototypeOf(PeriodField)).apply(this, arguments));
+	  }
+
+	  _createClass(PeriodField, [{
+	    key: 'handleChange',
+	    value: function handleChange(evnet, index, period) {
+	      this.props.onChange(period);
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      return _react2.default.createElement(
+	        _materialUi.SelectField,
+	        {
+	          value: this.props.value,
+	          onChange: this.handleChange.bind(this)
+	        },
+	        this.props.items.map(function (e, i) {
+	          return _react2.default.createElement(_materialUi.MenuItem, { key: i, value: e, primaryText: e.label });
+	        })
+	      );
+	    }
+	  }]);
+
+	  return PeriodField;
+	}(_react.Component);
+
+	exports.default = PeriodField;
+
+/***/ },
+/* 621 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _materialUi = __webpack_require__(395);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var ModeField = function (_Component) {
+	  _inherits(ModeField, _Component);
+
+	  function ModeField() {
+	    _classCallCheck(this, ModeField);
+
+	    return _possibleConstructorReturn(this, (ModeField.__proto__ || Object.getPrototypeOf(ModeField)).apply(this, arguments));
+	  }
+
+	  _createClass(ModeField, [{
+	    key: 'handleChange',
+	    value: function handleChange(event, index, value) {
+	      this.props.onChange(value);
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      return _react2.default.createElement(
+	        _materialUi.SelectField,
+	        {
+	          value: this.props.value,
+	          onChange: this.handleChange.bind(this)
+	        },
+	        _react2.default.createElement(_materialUi.MenuItem, { value: 'count', primaryText: '\u6295\u7A3F\u6570' }),
+	        _react2.default.createElement(_materialUi.MenuItem, { value: 'ratio', primaryText: '\u5168\u6295\u7A3F\u6570\u306B\u5BFE\u3059\u308B\u5272\u5408' })
+	      );
+	    }
+	  }]);
+
+	  return ModeField;
+	}(_react.Component);
+
+	exports.default = ModeField;
+
+/***/ },
+/* 622 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
 	exports.COLORS = undefined;
 
 	var _colors = __webpack_require__(335);
@@ -68714,7 +68878,7 @@
 	COLORS.values = [colors.red400, colors.indigo400, colors.teal400, colors.amber400, colors.brown400, colors.purple400, colors.lightBlue400, colors.lightGreen400, colors.orange400, colors.blueGrey400];
 
 /***/ },
-/* 621 */
+/* 623 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";

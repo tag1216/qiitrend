@@ -1,5 +1,14 @@
-import React from "react";
+import React, { Component } from "react";
 
-export default () => (
-  <div>Trend</div>
-)
+class Trend extends Component {
+  render() {
+    return (
+      <div>
+        <div>Trend</div>
+        <div>{ this.props.queries }</div>
+      </div>
+    );
+  }
+}
+
+export default Trend;

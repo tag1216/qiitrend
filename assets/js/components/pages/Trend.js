@@ -9,7 +9,7 @@ class Trend extends Component {
     return (
       <div>
         <div className="App-form-container">
-          <QueryField textFieldProps={{name: "addquery"}} onSubmit={this.props.onAddQuery}/>
+          <QueryField onSubmit={this.props.onAddQuery}/>
         </div>
         <div className="App-queries-container" style={{}}>
           {this.props.queries.map((q, i) => (

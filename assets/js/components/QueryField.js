@@ -6,6 +6,11 @@ import ActionSearch from 'material-ui/svg-icons/action/search';
 class QueryField extends Component {
 
   static defaultProps = {
+    textFieldProps: {
+      name: "q",
+      floatingLabelText: "検索クエリー",
+      hintText: "例) tag:python",
+    },
     value: "",
     onSubmit: () => {}
   }
@@ -35,7 +40,7 @@ class QueryField extends Component {
   render() {
     return (
       <div>
-        <ActionSearch {...this.props.iconProps}/>
+        { this.props.showIcon ? <ActionSearch {...this.props.iconProps}/> : "" }
         <TextField {...this.props.textFieldProps}
                    onChange={this.handleChange.bind(this)}
                    onKeyDown={this.handleKeyDown.bind(this)}>

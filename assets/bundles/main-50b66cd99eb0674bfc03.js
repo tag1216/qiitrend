@@ -68305,8 +68305,6 @@
 	      };
 
 	      var searchFieldProps = {
-	        floatingLabelText: "検索クエリー",
-	        hintText: "例) tag:python",
 	        autoFocus: true,
 	        inputStyle: {
 	          color: this.props.muiTheme.palette.alternateTextColor
@@ -68343,7 +68341,8 @@
 	              null,
 	              "\u30C1\u30E3\u30FC\u30C8\u306B\u8868\u793A\u3057\u305F\u3044\u6295\u7A3F\u306E\u691C\u7D22\u30AF\u30A8\u30EA\u30FC\u3092\u5165\u529B\u3057\u3066\u304F\u3060\u3055\u3044\u3002"
 	            ),
-	            _react2.default.createElement(_QueryField2.default, { iconProps: { style: styles.searchIcon },
+	            _react2.default.createElement(_QueryField2.default, { showIcon: true,
+	              iconProps: { style: styles.searchIcon },
 	              textFieldProps: searchFieldProps,
 	              onSubmit: this.handleQuerySubmit.bind(this)
 	            }),
@@ -68492,7 +68491,7 @@
 	      return _react2.default.createElement(
 	        "div",
 	        null,
-	        _react2.default.createElement(_search2.default, this.props.iconProps),
+	        this.props.showIcon ? _react2.default.createElement(_search2.default, this.props.iconProps) : "",
 	        _react2.default.createElement(_materialUi.TextField, _extends({}, this.props.textFieldProps, {
 	          onChange: this.handleChange.bind(this),
 	          onKeyDown: this.handleKeyDown.bind(this) }))
@@ -68504,6 +68503,11 @@
 	}(_react.Component);
 
 	QueryField.defaultProps = {
+	  textFieldProps: {
+	    name: "q",
+	    floatingLabelText: "検索クエリー",
+	    hintText: "例) tag:python"
+	  },
 	  value: "",
 	  onSubmit: function onSubmit() {}
 	};
@@ -68600,7 +68604,7 @@
 	        _react2.default.createElement(
 	          "div",
 	          { className: "App-form-container" },
-	          _react2.default.createElement(_QueryField2.default, { textFieldProps: { name: "addquery" }, onSubmit: this.props.onAddQuery })
+	          _react2.default.createElement(_QueryField2.default, { onSubmit: this.props.onAddQuery })
 	        ),
 	        _react2.default.createElement(
 	          "div",

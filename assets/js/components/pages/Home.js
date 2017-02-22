@@ -49,8 +49,6 @@ class Home extends Component {
     };
 
     const searchFieldProps = {
-      floatingLabelText: "検索クエリー",
-      hintText: "例) tag:python",
       autoFocus: true,
       inputStyle: {
         color: this.props.muiTheme.palette.alternateTextColor,
@@ -70,7 +68,8 @@ class Home extends Component {
             <h1 style={styles.h1}>QiiTrend</h1>
             <h2 style={styles.h2}>QiiTrendは、Qiitaの投稿件数の推移を時系列チャートで表示するサービスです。</h2>
             <div>チャートに表示したい投稿の検索クエリーを入力してください。</div>
-            <QueryField iconProps={{style: styles.searchIcon}}
+            <QueryField showIcon={true}
+                        iconProps={{style: styles.searchIcon}}
                         textFieldProps={searchFieldProps}
                         onSubmit={this.handleQuerySubmit.bind(this)}
             />

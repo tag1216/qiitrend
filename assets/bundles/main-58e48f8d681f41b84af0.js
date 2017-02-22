@@ -76,7 +76,7 @@
 
 	var _Trend2 = _interopRequireDefault(_Trend);
 
-	var _NotFound = __webpack_require__(619);
+	var _NotFound = __webpack_require__(621);
 
 	var _NotFound2 = _interopRequireDefault(_NotFound);
 
@@ -34407,6 +34407,10 @@
 
 	var _url2 = _interopRequireDefault(_url);
 
+	var _querystring = __webpack_require__(391);
+
+	var _querystring2 = _interopRequireDefault(_querystring);
+
 	var _Header = __webpack_require__(394);
 
 	var _Header2 = _interopRequireDefault(_Header);
@@ -34423,9 +34427,19 @@
 	  _inherits(App, _Component);
 
 	  function App() {
+	    var _ref;
+
+	    var _temp, _this, _ret;
+
 	    _classCallCheck(this, App);
 
-	    return _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).apply(this, arguments));
+	    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+	      args[_key] = arguments[_key];
+	    }
+
+	    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = App.__proto__ || Object.getPrototypeOf(App)).call.apply(_ref, [this].concat(args))), _this), _this.state = {
+	      queries: []
+	    }, _temp), _possibleConstructorReturn(_this, _ret);
 	  }
 
 	  _createClass(App, [{
@@ -34443,13 +34457,20 @@
 	    value: function mapParamsToState(location) {
 	      var urlQuery = _url2.default.parse(location.search, true).query;
 	      var props = {
-	        queries: !urlQuery.query ? [] : typeof urlQuery.query == "string" ? [urlQuery.query] : urlQuery.query
+	        queries: (!urlQuery.query ? [] : typeof urlQuery.query == "string" ? [urlQuery.query] : urlQuery.query).map(function (value) {
+	          return { value: value };
+	        })
 	      };
 	      this.setState(_extends({}, props));
 	    }
 	  }, {
 	    key: "render",
 	    value: function render() {
+	      var childProps = _extends({}, this.state, {
+	        onAddQuery: this.onAddQuery.bind(this),
+	        onRemoveQuery: this.onRemoveQuery.bind(this)
+	      });
+
 	      return _react2.default.createElement(
 	        "div",
 	        null,
@@ -34457,9 +34478,37 @@
 	        _react2.default.createElement(
 	          "main",
 	          null,
-	          this.props.children && _react2.default.cloneElement(this.props.children, _extends({}, this.state))
+	          this.props.children && _react2.default.cloneElement(this.props.children, childProps)
 	        )
 	      );
+	    }
+	  }, {
+	    key: "onAddQuery",
+	    value: function onAddQuery(query) {
+	      var queries = this.state.queries.concat([{ value: query }]).map(function (q) {
+	        return q.value;
+	      });
+	      this.context.router.push({
+	        pathname: "/trend",
+	        query: {
+	          query: queries
+	        }
+	      });
+	    }
+	  }, {
+	    key: "onRemoveQuery",
+	    value: function onRemoveQuery(query) {
+	      var queries = this.state.queries.filter(function (q) {
+	        return q !== query;
+	      }).map(function (query) {
+	        return query.value;
+	      });
+	      this.context.router.push({
+	        pathname: "/trend",
+	        query: {
+	          query: queries
+	        }
+	      });
 	    }
 	  }]);
 
@@ -68513,6 +68562,16 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
+	var _QueryField = __webpack_require__(616);
+
+	var _QueryField2 = _interopRequireDefault(_QueryField);
+
+	var _QueryChip = __webpack_require__(619);
+
+	var _QueryChip2 = _interopRequireDefault(_QueryChip);
+
+	var _colors = __webpack_require__(620);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -68533,18 +68592,26 @@
 	  _createClass(Trend, [{
 	    key: "render",
 	    value: function render() {
+	      var _this2 = this;
+
 	      return _react2.default.createElement(
 	        "div",
 	        null,
 	        _react2.default.createElement(
 	          "div",
-	          null,
-	          "Trend"
+	          { className: "App-form-container" },
+	          _react2.default.createElement(_QueryField2.default, { textFieldProps: { name: "addquery" }, onSubmit: this.props.onAddQuery })
 	        ),
 	        _react2.default.createElement(
 	          "div",
-	          null,
-	          this.props.queries
+	          { className: "App-queries-container", style: {} },
+	          this.props.queries.map(function (q, i) {
+	            return _react2.default.createElement(_QueryChip2.default, { key: i,
+	              query: q,
+	              color: (0, _colors.COLORS)(i),
+	              onRequestDelete: _this2.props.onRemoveQuery
+	            });
+	          })
 	        )
 	      );
 	    }
@@ -68557,6 +68624,99 @@
 
 /***/ },
 /* 619 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _materialUi = __webpack_require__(395);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var styles = {
+	  chip: {
+	    margin: '0 4px 4px 0'
+	  }
+	};
+
+	var QueryChip = function (_Component) {
+	  _inherits(QueryChip, _Component);
+
+	  function QueryChip() {
+	    var _ref;
+
+	    var _temp, _this, _ret;
+
+	    _classCallCheck(this, QueryChip);
+
+	    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+	      args[_key] = arguments[_key];
+	    }
+
+	    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = QueryChip.__proto__ || Object.getPrototypeOf(QueryChip)).call.apply(_ref, [this].concat(args))), _this), _this.handleRequestDelete = function () {
+	      _this.props.onRequestDelete(_this.props.query);
+	    }, _temp), _possibleConstructorReturn(_this, _ret);
+	  }
+
+	  _createClass(QueryChip, [{
+	    key: 'render',
+	    value: function render() {
+	      return _react2.default.createElement(
+	        _materialUi.Chip,
+	        {
+	          onRequestDelete: this.handleRequestDelete,
+	          style: styles.chip
+	        },
+	        _react2.default.createElement(_materialUi.Avatar, { backgroundColor: this.props.color }),
+	        this.props.query.value
+	      );
+	    }
+	  }]);
+
+	  return QueryChip;
+	}(_react.Component);
+
+	exports.default = QueryChip;
+
+/***/ },
+/* 620 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.COLORS = undefined;
+
+	var _colors = __webpack_require__(335);
+
+	var colors = _interopRequireWildcard(_colors);
+
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+	var COLORS = exports.COLORS = function COLORS(i) {
+	  return COLORS.values[i % COLORS.values.length];
+	};
+	COLORS.values = [colors.red400, colors.indigo400, colors.teal400, colors.amber400, colors.brown400, colors.purple400, colors.lightBlue400, colors.lightGreen400, colors.orange400, colors.blueGrey400];
+
+/***/ },
+/* 621 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";

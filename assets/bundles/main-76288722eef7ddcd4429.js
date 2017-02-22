@@ -68264,12 +68264,6 @@
 	  }
 
 	  _createClass(Home, [{
-	    key: "handleQuerySubmit",
-	    value: function handleQuerySubmit(query) {
-	      console.log(query);
-	      this.context.router.push("/trend/?query=" + query);
-	    }
-	  }, {
 	    key: "render",
 	    value: function render() {
 
@@ -68344,7 +68338,7 @@
 	            _react2.default.createElement(_QueryField2.default, { showIcon: true,
 	              iconProps: { style: styles.searchIcon },
 	              textFieldProps: searchFieldProps,
-	              onSubmit: this.handleQuerySubmit.bind(this)
+	              onSubmit: this.props.onAddQuery
 	            }),
 	            _react2.default.createElement(
 	              "div",

@@ -10,11 +10,6 @@ class Home extends Component {
     router: React.PropTypes.object.isRequired,
   };
 
-  handleQuerySubmit(query) {
-    console.log(query);
-    this.context.router.push(`/trend/?query=${query}`);
-  }
-
   render() {
 
     const styles = {
@@ -71,7 +66,7 @@ class Home extends Component {
             <QueryField showIcon={true}
                         iconProps={{style: styles.searchIcon}}
                         textFieldProps={searchFieldProps}
-                        onSubmit={this.handleQuerySubmit.bind(this)}
+                        onSubmit={this.props.onAddQuery}
             />
             <div>例) 「tag:python」 「tag:go or tag:golang」 「scocks:>=100」 </div>
             <div>検索方法は、Qiitaの検索と同じです。詳細はこちらを参照してください。</div>

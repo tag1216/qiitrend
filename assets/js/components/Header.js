@@ -9,17 +9,19 @@ export default class Header extends Component {
     router: React.PropTypes.object.isRequired,
   };
 
-  constructor(props) {
-    super(props);
-    console.log("App()");
-  }
-
   render() {
     const router = this.context.router;
     const isHome = router.isActive("/", true);
 
+    const styles = {
+      title: {
+        cursor: "pointer"
+      },
+    };
+
     const appBarProps = {
-      title: "QiiTrend",
+      title: <span style={styles.title}>QiiTrend</span>,
+      onTitleTouchTap: () => router.push("/"),
     };
 
     if (isHome) {

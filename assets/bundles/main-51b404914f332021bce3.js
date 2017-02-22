@@ -35961,13 +35961,10 @@
 	var Header = function (_Component) {
 	  _inherits(Header, _Component);
 
-	  function Header(props) {
+	  function Header() {
 	    _classCallCheck(this, Header);
 
-	    var _this = _possibleConstructorReturn(this, (Header.__proto__ || Object.getPrototypeOf(Header)).call(this, props));
-
-	    console.log("App()");
-	    return _this;
+	    return _possibleConstructorReturn(this, (Header.__proto__ || Object.getPrototypeOf(Header)).apply(this, arguments));
 	  }
 
 	  _createClass(Header, [{
@@ -35976,8 +35973,21 @@
 	      var router = this.context.router;
 	      var isHome = router.isActive("/", true);
 
+	      var styles = {
+	        title: {
+	          cursor: "pointer"
+	        }
+	      };
+
 	      var appBarProps = {
-	        title: "QiiTrend"
+	        title: _react2.default.createElement(
+	          "span",
+	          { style: styles.title },
+	          "QiiTrend"
+	        ),
+	        onTitleTouchTap: function onTitleTouchTap() {
+	          return router.push("/");
+	        }
 	      };
 
 	      if (isHome) {

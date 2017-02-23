@@ -28,6 +28,7 @@ export default class App extends Component {
     mode: "count",
     loading: false,
     message: null,
+    itemCounts: [],
   };
 
   componentWillMount() {
@@ -122,7 +123,7 @@ export default class App extends Component {
             console.log("しばらくお待ちください。");
             this.setState({
               loading: false,
-              itemCounts: null,
+              itemCounts: [],
               message: (
                 <div>
                   <div>データの取得に時間が掛かっています。</div>
@@ -146,7 +147,7 @@ export default class App extends Component {
         console.error(results);
         this.setState({
           loading: false,
-          itemCounts: null,
+          itemCounts: [],
           message: (
             <div>
               <div><span>{results.statusCode}</span><span>{results.statusText}</span></div>
@@ -181,10 +182,6 @@ export default class App extends Component {
           }
         });
     });
-  }
-
-  setItemCounts(itemCounts) {
-    console.table(itemCounts);
   }
 }
 

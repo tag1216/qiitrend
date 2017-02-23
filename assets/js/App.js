@@ -1,6 +1,6 @@
 import React, { propTypes } from "react";
 import { Component } from "react";
-
+import request from 'superagent';
 import url from "url";
 
 import Header from "./components/Header";
@@ -12,7 +12,7 @@ const periodItems = [
   { label: '過去24ヶ月', unit: 'monthly', period: 25 },
   { label: '過去3年', unit: 'yearly', period: 4 },
   { label: '過去5年', unit: 'yearly', period: 6 },
-  { label: '全期間(2011-)', unit: 'yearly', period: 'all' },
+  { label: '全期間(2011-)', unit: 'yearly', period: '' },
 ];
 
 export default class App extends Component {
@@ -26,6 +26,7 @@ export default class App extends Component {
     queries: [],
     period: periodItems[3],
     mode: "count",
+    loading: false,
   };
 
   componentWillMount() {
@@ -38,15 +39,17 @@ export default class App extends Component {
 
   mapParamsToState(location) {
     const urlQuery = url.parse(location.search, true).query;
-    const props = {
-      queries: (!urlQuery.query ? [] :
-                typeof urlQuery.query == "string" ? [urlQuery.query] :
-                urlQuery.query).map(value => {return {value}}),
-      period: periodItems.find(p => p.unit === urlQuery.unit && "" + p.period === urlQuery.period)
-                || periodItems[3],
-      mode: urlQuery.mode || "count",
-    };
-    this.setState({...props});
+    const queries = (!urlQuery.query ? [] :
+        typeof urlQuery.query == "string" ? [urlQuery.query] :
+          urlQuery.query).map(value => {return {value}});
+    const period = periodItems.find(p => p.unit === urlQuery.unit && "" + p.period === urlQuery.period)
+        || periodItems[3];
+    const mode = urlQuery.mode || "count";
+
+    this.setState({queries, period, mode});
+    if (queries.length !== 0) {
+      this.fetchItemCounts(queries, period);
+    }
   }
 
   render() {
@@ -84,7 +87,6 @@ export default class App extends Component {
 
   onChangeMode(mode) {
     this.pushState(this.state.queries, this.state.period, mode);
-
   }
 
   pushState(queries, period, mode) {
@@ -97,6 +99,36 @@ export default class App extends Component {
         mode: mode,
       },
     });
+  }
+
+  fetchItemCounts(queries, period) {
+
+    this.setState({loading: true});
+
+    return new Promise((resolve, reject) => {
+      request
+        .get("/api/itemcounts/")
+        .withCredentials()
+        .query({
+          query: queries.map(q => q.value),
+          unit: period.unit,
+          period: period.period,
+        })
+        .query({ query: "" })
+        .end((err, res) => {
+          if (err) {
+            reject({
+              statusCode: res.statusCode,
+              statusText: res.statusText,
+              detail: res.body.detail || null
+            });
+          } else {
+            resolve(res.body);
+          }
+          this.setState({loading: false});
+        });
+    }).then(result => console.table(result))
+      .catch(result => console.error(result));
   }
 
 

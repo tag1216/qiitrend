@@ -76,7 +76,7 @@
 
 	var _Trend2 = _interopRequireDefault(_Trend);
 
-	var _NotFound = __webpack_require__(632);
+	var _NotFound = __webpack_require__(633);
 
 	var _NotFound2 = _interopRequireDefault(_NotFound);
 
@@ -34444,7 +34444,8 @@
 	      queries: [],
 	      period: periodItems[3],
 	      mode: "count",
-	      loading: false
+	      loading: false,
+	      message: null
 	    }, _temp), _possibleConstructorReturn(_this, _ret);
 	  }
 
@@ -34482,7 +34483,8 @@
 	        onAddQuery: this.onAddQuery.bind(this),
 	        onRemoveQuery: this.onRemoveQuery.bind(this),
 	        onChangePeriod: this.onChangePeriod.bind(this),
-	        onChangeMode: this.onChangeMode.bind(this)
+	        onChangeMode: this.onChangeMode.bind(this),
+	        onMessageDialogClose: this.onMessageDialogClose.bind(this)
 	      });
 
 	      return _react2.default.createElement(
@@ -34521,6 +34523,13 @@
 	      this.pushState(this.state.queries, this.state.period, mode);
 	    }
 	  }, {
+	    key: "onMessageDialogClose",
+	    value: function onMessageDialogClose() {
+	      this.setState({
+	        message: null
+	      });
+	    }
+	  }, {
 	    key: "pushState",
 	    value: function pushState(queries, period, mode) {
 	      this.context.router.push({
@@ -34540,8 +34549,85 @@
 	    value: function fetchItemCounts(queries, period) {
 	      var _this2 = this;
 
+	      var times = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 5;
+	      var interval = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 2000;
+
+
 	      this.setState({ loading: true });
 
+	      this.requestItemCounts(queries, period).then(function (results) {
+
+	        if (results.some(function (r) {
+	          return r.count === null;
+	        })) {
+
+	          if (times <= 1) {
+	            console.log("しばらくお待ちください。");
+	            _this2.setState({
+	              loading: false,
+	              itemCounts: null,
+	              message: _react2.default.createElement(
+	                "div",
+	                null,
+	                _react2.default.createElement(
+	                  "div",
+	                  null,
+	                  "\u30C7\u30FC\u30BF\u306E\u53D6\u5F97\u306B\u6642\u9593\u304C\u639B\u304B\u3063\u3066\u3044\u307E\u3059\u3002"
+	                ),
+	                _react2.default.createElement(
+	                  "div",
+	                  null,
+	                  "\u3057\u3070\u3089\u304F\u3057\u3066\u304B\u3089\u518D\u8AAD\u307F\u8FBC\u307F\u3057\u3066\u304F\u3060\u3055\u3044\u3002"
+	                )
+	              )
+	            });
+	            return;
+	          }
+
+	          wait(interval).then(function () {
+	            return _this2.fetchItemCounts(queries, period, times - 1, interval);
+	          });
+	          return;
+	        }
+
+	        _this2.setState({
+	          loading: false,
+	          itemCounts: results
+	        });
+	      }).catch(function (results) {
+	        console.error(results);
+	        _this2.setState({
+	          loading: false,
+	          itemCounts: null,
+	          message: _react2.default.createElement(
+	            "div",
+	            null,
+	            _react2.default.createElement(
+	              "div",
+	              null,
+	              _react2.default.createElement(
+	                "span",
+	                null,
+	                results.statusCode
+	              ),
+	              _react2.default.createElement(
+	                "span",
+	                null,
+	                results.statusText
+	              )
+	            ),
+	            _react2.default.createElement(
+	              "div",
+	              null,
+	              results.detail
+	            )
+	          )
+	        });
+	      });
+	    }
+	  }, {
+	    key: "requestItemCounts",
+	    value: function requestItemCounts(queries, period) {
 	      return new Promise(function (resolve, reject) {
 	        _superagent2.default.get("/api/itemcounts/").withCredentials().query({
 	          query: queries.map(function (q) {
@@ -34559,13 +34645,13 @@
 	          } else {
 	            resolve(res.body);
 	          }
-	          _this2.setState({ loading: false });
 	        });
-	      }).then(function (result) {
-	        return console.table(result);
-	      }).catch(function (result) {
-	        return console.error(result);
 	      });
+	    }
+	  }, {
+	    key: "setItemCounts",
+	    value: function setItemCounts(itemCounts) {
+	      console.table(itemCounts);
 	    }
 	  }]);
 
@@ -34576,6 +34662,15 @@
 	  router: _react2.default.PropTypes.object.isRequired
 	};
 	exports.default = App;
+
+
+	function wait(times) {
+	  return new Promise(function (resolve) {
+	    setTimeout(function () {
+	      resolve(0);
+	    }, times);
+	  });
+	}
 
 /***/ },
 /* 388 */
@@ -70612,7 +70707,11 @@
 
 	var _LoadingDialog2 = _interopRequireDefault(_LoadingDialog);
 
-	var _colors = __webpack_require__(631);
+	var _MessageDialog = __webpack_require__(631);
+
+	var _MessageDialog2 = _interopRequireDefault(_MessageDialog);
+
+	var _colors = __webpack_require__(632);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -70672,7 +70771,10 @@
 	            onChange: this.props.onChangeMode
 	          })
 	        ),
-	        _react2.default.createElement(_LoadingDialog2.default, { open: this.props.loading })
+	        _react2.default.createElement(_LoadingDialog2.default, { open: this.props.loading }),
+	        _react2.default.createElement(_MessageDialog2.default, { message: this.props.message,
+	          onClose: this.props.onMessageDialogClose
+	        })
 	      );
 	    }
 	  }]);
@@ -70937,6 +71039,68 @@
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _materialUi = __webpack_require__(403);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var MessageDialog = function (_Component) {
+	  _inherits(MessageDialog, _Component);
+
+	  function MessageDialog() {
+	    _classCallCheck(this, MessageDialog);
+
+	    return _possibleConstructorReturn(this, (MessageDialog.__proto__ || Object.getPrototypeOf(MessageDialog)).apply(this, arguments));
+	  }
+
+	  _createClass(MessageDialog, [{
+	    key: 'handleClose',
+	    value: function handleClose() {
+	      this.props.onClose();
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      var open = this.props.message ? true : false;
+	      return _react2.default.createElement(
+	        _materialUi.Dialog,
+	        { modal: false,
+	          open: open,
+	          onRequestClose: this.handleClose.bind(this),
+	          autoScrollBodyContent: true,
+	          actions: [_react2.default.createElement(_materialUi.FlatButton, { label: '\u9589\u3058\u308B', onTouchTap: this.handleClose.bind(this) })]
+	        },
+	        this.props.message
+	      );
+	    }
+	  }]);
+
+	  return MessageDialog;
+	}(_react.Component);
+
+	exports.default = MessageDialog;
+
+/***/ },
+/* 632 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
 	exports.COLORS = undefined;
 
 	var _colors = __webpack_require__(335);
@@ -70951,7 +71115,7 @@
 	COLORS.values = [colors.red400, colors.indigo400, colors.teal400, colors.amber400, colors.brown400, colors.purple400, colors.lightBlue400, colors.lightGreen400, colors.orange400, colors.blueGrey400];
 
 /***/ },
-/* 632 */
+/* 633 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";

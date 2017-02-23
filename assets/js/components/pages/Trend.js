@@ -5,6 +5,7 @@ import QueryChip from "../QueryChip";
 import PeriodField from "../PeriodField";
 import ModeField from "../ModeField";
 import LoadingDialog from "../LoadingDialog";
+import MessageDialog from "../MessageDialog";
 import { COLORS } from "../../colors";
 
 class Trend extends Component {
@@ -37,6 +38,9 @@ class Trend extends Component {
           />
         </span>
         <LoadingDialog open={this.props.loading} />
+        <MessageDialog message={this.props.message}
+                       onClose={this.props.onMessageDialogClose}
+        />
       </div>
     );
   }

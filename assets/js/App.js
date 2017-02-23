@@ -27,6 +27,7 @@ export default class App extends Component {
     period: periodItems[3],
     mode: "count",
     loading: false,
+    message: null,
   };
 
   componentWillMount() {
@@ -59,6 +60,7 @@ export default class App extends Component {
       onRemoveQuery: this.onRemoveQuery.bind(this),
       onChangePeriod: this.onChangePeriod.bind(this),
       onChangeMode: this.onChangeMode.bind(this),
+      onMessageDialogClose: this.onMessageDialogClose.bind(this),
     };
 
     return (
@@ -89,6 +91,12 @@ export default class App extends Component {
     this.pushState(this.state.queries, this.state.period, mode);
   }
 
+  onMessageDialogClose() {
+    this.setState({
+      message: null,
+    });
+  }
+
   pushState(queries, period, mode) {
     this.context.router.push({
       pathname: "/trend",
@@ -101,10 +109,56 @@ export default class App extends Component {
     });
   }
 
-  fetchItemCounts(queries, period) {
+  fetchItemCounts(queries, period, times = 5, interval = 2000) {
 
     this.setState({loading: true});
 
+    this.requestItemCounts(queries, period)
+      .then(results => {
+
+        if (results.some(r => r.count === null)) {
+
+          if (times <= 1) {
+            console.log("しばらくお待ちください。");
+            this.setState({
+              loading: false,
+              itemCounts: null,
+              message: (
+                <div>
+                  <div>データの取得に時間が掛かっています。</div>
+                  <div>しばらくしてから再読み込みしてください。</div>
+                </div>
+              )
+            });
+            return;
+          }
+
+          wait(interval).then(() => this.fetchItemCounts(queries, period, times - 1, interval));
+          return;
+        }
+
+        this.setState({
+          loading: false,
+          itemCounts: results,
+        });
+      })
+      .catch(results => {
+        console.error(results);
+        this.setState({
+          loading: false,
+          itemCounts: null,
+          message: (
+            <div>
+              <div><span>{results.statusCode}</span><span>{results.statusText}</span></div>
+              <div>{results.detail}</div>
+            </div>
+          ),
+        });
+      });
+
+  }
+
+  requestItemCounts(queries, period) {
     return new Promise((resolve, reject) => {
       request
         .get("/api/itemcounts/")
@@ -125,11 +179,19 @@ export default class App extends Component {
           } else {
             resolve(res.body);
           }
-          this.setState({loading: false});
         });
-    }).then(result => console.table(result))
-      .catch(result => console.error(result));
+    });
   }
 
+  setItemCounts(itemCounts) {
+    console.table(itemCounts);
+  }
+}
 
+function wait(times) {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(0)
+    }, times);
+  });
 }

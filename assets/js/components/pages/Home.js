@@ -44,6 +44,7 @@ class Home extends Component {
     };
 
     const searchFieldProps = {
+      name: "q",
       autoFocus: true,
       inputStyle: {
         color: this.props.muiTheme.palette.alternateTextColor,

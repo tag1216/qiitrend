@@ -70426,6 +70426,7 @@
 	      };
 
 	      var searchFieldProps = {
+	        name: "q",
 	        autoFocus: true,
 	        inputStyle: {
 	          color: this.props.muiTheme.palette.alternateTextColor
@@ -70588,7 +70589,6 @@
 	      state: _this.props.value
 	    };
 
-	    console.log(_this.props);
 	    _this.state.value = _this.props.value;
 	    return _this;
 	  }

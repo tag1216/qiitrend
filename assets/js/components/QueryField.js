@@ -43,6 +43,7 @@ class QueryField extends Component {
       <div>
         { this.props.showIcon ? <ActionSearch {...this.props.iconProps}/> : "" }
         <TextField {...this.props.textFieldProps}
+                   autoFocus="true"
                    value={this.state.value}
                    onChange={this.handleChange.bind(this)}
                    onKeyDown={this.handleKeyDown.bind(this)}>

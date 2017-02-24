@@ -70623,6 +70623,7 @@
 	    value: function handleKeyDown(event) {
 	      if (event.keyCode == 13) {
 	        var value = this.state.value;
+	        this.setState({ value: "" });
 	        this.props.onSubmit(value);
 	      }
 	    }
@@ -70634,6 +70635,7 @@
 	        null,
 	        this.props.showIcon ? _react2.default.createElement(_search2.default, this.props.iconProps) : "",
 	        _react2.default.createElement(_materialUi.TextField, _extends({}, this.props.textFieldProps, {
+	          value: this.state.value,
 	          onChange: this.handleChange.bind(this),
 	          onKeyDown: this.handleKeyDown.bind(this) }))
 	      );

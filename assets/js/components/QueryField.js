@@ -13,7 +13,7 @@ class QueryField extends Component {
     },
     value: "",
     onSubmit: () => {}
-  }
+  };
 
   state = {
     state: this.props.value
@@ -32,6 +32,7 @@ class QueryField extends Component {
   handleKeyDown(event) {
     if (event.keyCode == 13) {
       const value = this.state.value;
+      this.setState({value: ""});
       this.props.onSubmit(value);
     }
   }
@@ -41,6 +42,7 @@ class QueryField extends Component {
       <div>
         { this.props.showIcon ? <ActionSearch {...this.props.iconProps}/> : "" }
         <TextField {...this.props.textFieldProps}
+                   value={this.state.value}
                    onChange={this.handleChange.bind(this)}
                    onKeyDown={this.handleKeyDown.bind(this)}>
         </TextField>

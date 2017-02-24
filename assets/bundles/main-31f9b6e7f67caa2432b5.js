@@ -34464,7 +34464,8 @@
 	    key: "mapParamsToState",
 	    value: function mapParamsToState(location) {
 	      var urlQuery = _url2.default.parse(location.search, true).query;
-	      var queries = (!urlQuery.query ? [] : typeof urlQuery.query == "string" ? [urlQuery.query] : urlQuery.query).map(function (value) {
+	      console.log(urlQuery);
+	      var queries = (typeof urlQuery.query == "string" ? [urlQuery.query] : !urlQuery.query ? [] : urlQuery.query).map(function (value) {
 	        return { value: value };
 	      });
 	      var period = periodItems.find(function (p) {
@@ -34596,57 +34597,69 @@
 	          itemCounts: results
 	        });
 	      }).catch(function (results) {
-	        console.error(results);
-	        if (results.statusCode === 429) {
-	          var retryAfter = results.headers["retry-after"];
+	        var err = results.err,
+	            res = results.res;
+
+	        _this2.setState({
+	          loading: false,
+	          itemCounts: []
+	        });
+	        if (res && res.body && res.body.detail) {
+	          if (res.statusCode === 429) {
+	            var retryAfter = res.headers["retry-after"];
+	            _this2.setState({
+	              message: _react2.default.createElement(
+	                "div",
+	                null,
+	                _react2.default.createElement(
+	                  "div",
+	                  null,
+	                  "\u30EA\u30AF\u30A8\u30B9\u30C8\u6570\u5236\u9650\u3092\u8D85\u904E\u3057\u307E\u3057\u305F\u3002"
+	                ),
+	                _react2.default.createElement(
+	                  "div",
+	                  null,
+	                  retryAfter < 60 ? retryAfter + "秒" : Math.floor(retryAfter / 60) + "分",
+	                  "\u4EE5\u4E0A\u5F85\u3063\u3066\u304F\u3060\u3055\u3044\u3002"
+	                )
+	              )
+	            });
+	          } else {
+	            _this2.setState({
+	              message: _react2.default.createElement(
+	                "div",
+	                null,
+	                _react2.default.createElement(
+	                  "div",
+	                  null,
+	                  _react2.default.createElement(
+	                    "span",
+	                    null,
+	                    results.statusCode
+	                  ),
+	                  _react2.default.createElement(
+	                    "span",
+	                    null,
+	                    results.statusText
+	                  )
+	                ),
+	                _react2.default.createElement(
+	                  "div",
+	                  null,
+	                  results.detail
+	                )
+	              )
+	            });
+	          }
+	        } else {
 	          _this2.setState({
-	            loading: false,
-	            itemCounts: [],
 	            message: _react2.default.createElement(
 	              "div",
 	              null,
-	              _react2.default.createElement(
-	                "div",
-	                null,
-	                "\u30EA\u30AF\u30A8\u30B9\u30C8\u6570\u5236\u9650\u3092\u8D85\u904E\u3057\u307E\u3057\u305F\u3002"
-	              ),
-	              _react2.default.createElement(
-	                "div",
-	                null,
-	                retryAfter < 60 ? retryAfter + "秒" : Math.floor(retryAfter / 60) + "分",
-	                "\u4EE5\u4E0A\u5F85\u3063\u3066\u304F\u3060\u3055\u3044\u3002"
-	              )
+	              "\u30B5\u30FC\u30D0\u30FC\u30A8\u30E9\u30FC"
 	            )
 	          });
-	          return;
 	        }
-	        _this2.setState({
-	          loading: false,
-	          itemCounts: [],
-	          message: _react2.default.createElement(
-	            "div",
-	            null,
-	            _react2.default.createElement(
-	              "div",
-	              null,
-	              _react2.default.createElement(
-	                "span",
-	                null,
-	                results.statusCode
-	              ),
-	              _react2.default.createElement(
-	                "span",
-	                null,
-	                results.statusText
-	              )
-	            ),
-	            _react2.default.createElement(
-	              "div",
-	              null,
-	              results.detail
-	            )
-	          )
-	        });
 	      });
 	    }
 	  }, {
@@ -34661,12 +34674,7 @@
 	          period: period.period
 	        }).query({ query: "" }).end(function (err, res) {
 	          if (err) {
-	            reject({
-	              statusCode: res.statusCode,
-	              statusText: res.statusText,
-	              detail: res.body.detail || null,
-	              headers: res.headers
-	            });
+	            reject({ err: err, res: res });
 	          } else {
 	            resolve(res.body);
 	          }
@@ -70624,6 +70632,7 @@
 	      if (event.keyCode == 13) {
 	        var value = this.state.value;
 	        this.setState({ value: "" });
+	        event.target.blur();
 	        this.props.onSubmit(value);
 	      }
 	    }
@@ -70635,6 +70644,7 @@
 	        null,
 	        this.props.showIcon ? _react2.default.createElement(_search2.default, this.props.iconProps) : "",
 	        _react2.default.createElement(_materialUi.TextField, _extends({}, this.props.textFieldProps, {
+	          autoFocus: "true",
 	          value: this.state.value,
 	          onChange: this.handleChange.bind(this),
 	          onKeyDown: this.handleKeyDown.bind(this) }))
@@ -70771,7 +70781,7 @@
 	          { className: "App-form-container" },
 	          _react2.default.createElement(_QueryField2.default, { onSubmit: this.props.onAddQuery })
 	        ),
-	        this.props.itemCounts.length === 0 || this.props.loading ? null : _react2.default.createElement(
+	        this.props.queries.length === 0 || this.props.loading ? null : _react2.default.createElement(
 	          "div",
 	          { className: "App-chart-container" },
 	          _react2.default.createElement("div", null),

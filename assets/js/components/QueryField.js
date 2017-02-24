@@ -33,6 +33,7 @@ class QueryField extends Component {
     if (event.keyCode == 13) {
       const value = this.state.value;
       this.setState({value: ""});
+      event.target.blur();
       this.props.onSubmit(value);
     }
   }

@@ -70816,7 +70816,7 @@
 	            ),
 	            _react2.default.createElement(
 	              "div",
-	              { className: "App-chart", style: { width: 800, height: 400 } },
+	              { className: "App-chart" },
 	              _react2.default.createElement(_Chart2.default, { queries: this.props.queries,
 	                itemCounts: this.props.itemCounts,
 	                mode: this.props.mode
@@ -71221,11 +71221,15 @@
 	        _react2.default.createElement(
 	          _recharts.LineChart,
 	          { data: data,
-	            margin: { top: 10, right: 40, left: 20, bottom: 5 } },
-	          _react2.default.createElement(_recharts.XAxis, { dataKey: 'date' }),
-	          _react2.default.createElement(_recharts.YAxis, { tickFormatter: formatter }),
+	            margin: { top: 10, right: 5, left: 5, bottom: 5 } },
+	          _react2.default.createElement(_recharts.XAxis, { dataKey: 'date',
+	            tick: { fontSize: 12 } }),
+	          _react2.default.createElement(_recharts.YAxis, { tickFormatter: formatter,
+	            tick: { fontSize: 12 } }),
 	          _react2.default.createElement(_recharts.CartesianGrid, { strokeDasharray: '3 3' }),
-	          _react2.default.createElement(_recharts.Tooltip, { formatter: formatter }),
+	          _react2.default.createElement(_recharts.Tooltip, { formatter: formatter,
+	            labelStyle: { fontSize: 12 },
+	            itemStyle: { fontSize: 12, padding: 0 } }),
 	          this.props.queries.map(function (q, i) {
 	            return _react2.default.createElement(_recharts.Line, { key: q.value, type: 'monotone', dataKey: q.value, stroke: (0, _colors.COLORS)(i) });
 	          })

@@ -41,9 +41,10 @@ export default class App extends Component {
 
   mapParamsToState(location) {
     const urlQuery = url.parse(location.search, true).query;
-    const queries = (!urlQuery.query ? [] :
-        typeof urlQuery.query == "string" ? [urlQuery.query] :
-          urlQuery.query).map(value => {return {value}});
+    console.log(urlQuery);
+    const queries = (typeof urlQuery.query == "string" ? [urlQuery.query] :
+                     !urlQuery.query ? [] :
+                     urlQuery.query).map(value => {return {value}});
     const period = periodItems.find(p => p.unit === urlQuery.unit && "" + p.period === urlQuery.period)
         || periodItems[3];
     const mode = urlQuery.mode || "count";

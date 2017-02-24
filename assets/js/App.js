@@ -145,6 +145,23 @@ export default class App extends Component {
       })
       .catch(results => {
         console.error(results);
+        if (results.statusCode === 429) {
+          const retryAfter = results.headers["retry-after"];
+          this.setState({
+            loading: false,
+            itemCounts: [],
+            message: (
+              <div>
+                <div>リクエスト数制限を超過しました。</div>
+                <div>
+                  {retryAfter < 60 ? retryAfter + "秒" : Math.floor(retryAfter / 60) + "分"}
+                  以上待ってください。
+                </div>
+              </div>
+            )
+          });
+          return;
+        }
         this.setState({
           loading: false,
           itemCounts: [],
@@ -175,7 +192,8 @@ export default class App extends Component {
             reject({
               statusCode: res.statusCode,
               statusText: res.statusText,
-              detail: res.body.detail || null
+              detail: res.body.detail || null,
+              headers: res.headers,
             });
           } else {
             resolve(res.body);

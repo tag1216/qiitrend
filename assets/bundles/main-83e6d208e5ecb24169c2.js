@@ -34597,6 +34597,29 @@
 	        });
 	      }).catch(function (results) {
 	        console.error(results);
+	        if (results.statusCode === 429) {
+	          var retryAfter = results.headers["retry-after"];
+	          _this2.setState({
+	            loading: false,
+	            itemCounts: [],
+	            message: _react2.default.createElement(
+	              "div",
+	              null,
+	              _react2.default.createElement(
+	                "div",
+	                null,
+	                "\u30EA\u30AF\u30A8\u30B9\u30C8\u6570\u5236\u9650\u3092\u8D85\u904E\u3057\u307E\u3057\u305F\u3002"
+	              ),
+	              _react2.default.createElement(
+	                "div",
+	                null,
+	                retryAfter < 60 ? retryAfter + "秒" : Math.floor(retryAfter / 60) + "分",
+	                "\u4EE5\u4E0A\u5F85\u3063\u3066\u304F\u3060\u3055\u3044\u3002"
+	              )
+	            )
+	          });
+	          return;
+	        }
 	        _this2.setState({
 	          loading: false,
 	          itemCounts: [],
@@ -34641,7 +34664,8 @@
 	            reject({
 	              statusCode: res.statusCode,
 	              statusText: res.statusText,
-	              detail: res.body.detail || null
+	              detail: res.body.detail || null,
+	              headers: res.headers
 	            });
 	          } else {
 	            resolve(res.body);

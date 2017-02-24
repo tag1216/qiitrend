@@ -41,7 +41,7 @@ class Trend extends Component {
                   />
                 ))}
               </div>
-              <div className="App-chart" style={{width: 800, height: 400}}>
+              <div className="App-chart">
                 <Chart queries={this.props.queries}
                        itemCounts={this.props.itemCounts}
                        mode={this.props.mode}

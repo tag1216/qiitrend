@@ -37,11 +37,15 @@ export default class Chart extends Component {
     return (
       <ResponsiveContainer>
         <LineChart data={data}
-                   margin={{top: 10, right: 40, left: 20, bottom: 5}}>
-          <XAxis dataKey="date"/>
-          <YAxis tickFormatter={formatter}/>
+                   margin={{top: 10, right: 5, left: 5, bottom: 5}}>
+          <XAxis dataKey="date"
+                 tick={{fontSize: 12}}/>
+          <YAxis tickFormatter={formatter}
+                 tick={{fontSize: 12}}/>
           <CartesianGrid strokeDasharray="3 3"/>
-          <Tooltip formatter={formatter} />
+          <Tooltip formatter={formatter}
+                   labelStyle={{fontSize: 12}}
+                   itemStyle={{fontSize: 12, padding: 0}}/>
           {this.props.queries.map((q, i) => (
             <Line key={q.value} type="monotone" dataKey={q.value} stroke={COLORS(i)} />
           ))}

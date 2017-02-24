@@ -5,3 +5,58 @@ html, body {
   width: auto;
   font-family: sans-serif;
 }
+
+html, body {
+  background-color: #fafafa;
+}
+
+.App-content {
+  padding-top: 8px;
+}
+
+.App-form-container {
+  padding: 0 32px;
+}
+
+.App-option {
+  margin-right: 16px;
+}
+
+.App-queries-container {
+  margin-right: 5px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.App-chart-container {
+  padding: 0 32px;
+  margin-bottom: 16px;
+}
+
+.App-chart-paper {
+  width: 100%;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 0 16px;
+}
+
+.App-chart {
+  height: 400px;
+}
+
+@media screen and (max-height:639px) {
+  .App-chart {
+    height: 200px;
+  }
+}
+
+@media screen and (max-width:639px) {
+  .App-form-container {
+    padding: 0 5%;
+  }
+  .App-chart-container {
+    padding: 0 5%;
+  }
+}

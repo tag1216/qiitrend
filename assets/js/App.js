@@ -144,34 +144,40 @@ export default class App extends Component {
         });
       })
       .catch(results => {
-        console.error(results);
-        if (results.statusCode === 429) {
-          const retryAfter = results.headers["retry-after"];
-          this.setState({
-            loading: false,
-            itemCounts: [],
-            message: (
-              <div>
-                <div>リクエスト数制限を超過しました。</div>
-                <div>
-                  {retryAfter < 60 ? retryAfter + "秒" : Math.floor(retryAfter / 60) + "分"}
-                  以上待ってください。
-                </div>
-              </div>
-            )
-          });
-          return;
-        }
+        const {err, res} = results;
         this.setState({
           loading: false,
           itemCounts: [],
-          message: (
-            <div>
-              <div><span>{results.statusCode}</span><span>{results.statusText}</span></div>
-              <div>{results.detail}</div>
-            </div>
-          ),
         });
+        if (res && res.body && res.body.detail) {
+          if (res.statusCode === 429) {
+            const retryAfter = res.headers["retry-after"];
+            this.setState({
+              message: (
+                <div>
+                  <div>リクエスト数制限を超過しました。</div>
+                  <div>
+                    {retryAfter < 60 ? retryAfter + "秒" : Math.floor(retryAfter / 60) + "分"}
+                    以上待ってください。
+                  </div>
+                </div>
+              )
+            });
+          } else {
+            this.setState({
+              message: (
+                <div>
+                  <div><span>{results.statusCode}</span><span>{results.statusText}</span></div>
+                  <div>{results.detail}</div>
+                </div>
+              ),
+            });
+          }
+        } else {
+          this.setState({
+            message: <div>サーバーエラー</div>,
+          });
+        }
       });
 
   }
@@ -189,12 +195,7 @@ export default class App extends Component {
         .query({ query: "" })
         .end((err, res) => {
           if (err) {
-            reject({
-              statusCode: res.statusCode,
-              statusText: res.statusText,
-              detail: res.body.detail || null,
-              headers: res.headers,
-            });
+            reject({err, res});
           } else {
             resolve(res.body);
           }

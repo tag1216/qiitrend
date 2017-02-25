@@ -25,7 +25,7 @@ module.exports = {
         loader: 'babel-loader', // to transform JSX into JS
         query:
         {
-          presets:['react', 'es2015']
+          presets:['react', 'es2015', 'stage-1']
         }
       }
     ],

@@ -27,7 +27,14 @@ config.plugins = config.plugins.concat([
 
 // Add a loader for JSX files
 config.module.loaders.push(
-  { test: /\.jsx?$/, exclude: /node_modules/, loader: 'babel' }
+  { test: /\.jsx?$/,
+    exclude: /node_modules/,
+    loader: 'babel',
+    query:
+    {
+      presets:['react', 'es2015', 'stage-1']
+    }
+ }
 )
 
 module.exports = config

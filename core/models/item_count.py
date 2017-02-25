@@ -1,7 +1,7 @@
 import logging
 import threading
 from concurrent.futures import ThreadPoolExecutor
-from datetime import date
+from datetime import date, timedelta
 
 import redis
 import time
@@ -83,10 +83,15 @@ def _async_request(key: str, query: QiitaSearchQuery, unit: Unit, d: date):
         logger.info("q:{} response time:{:.3f}"
                     .format(query_with_date.query, response_time))
 
-        if unit.delta(date.today(), d) != 0:
-            expire = settings.COUNT_CACHE_EXPIRE
+        if ((d + unit.relativedelta(1)) - date.today()).days >= 0:
+            logger.info("{} : COUNT_CACHE_EXPIRE_LAST".format(unit.format(d)))
+            expire = settings.COUNT_CACHE_EXPIRE_LAST
+        elif "stocks:" in query.query:
+            logger.info("{} : COUNT_CACHE_EXPIRE_STOCKS".format(unit.format(d)))
+            expire = settings.COUNT_CACHE_EXPIRE_STOCKS
         else:
-            expire = settings.LAST_COUNT_CACHE_EXPIRE
+            logger.info("{} : COUNT_CACHE_EXPIRE_DEFAULT".format(unit.format(d)))
+            expire = settings.COUNT_CACHE_EXPIRE_DEFAULT
 
         cache_client = ItemCountCacheClient()
         cache_client.cache.setex(key, cnt, expire)

@@ -23,6 +23,8 @@ export default class App extends Component {
 
   state = {
     periodItems,
+    loggedIn: false,
+    user: null,
     queries: [],
     period: periodItems[3],
     mode: "count",
@@ -32,11 +34,25 @@ export default class App extends Component {
   };
 
   componentWillMount() {
+    this.checkAccount();
     this.mapParamsToState(this.props.location);
   }
 
   componentWillReceiveProps(nextProps) {
     this.mapParamsToState(nextProps.location);
+  }
+
+  checkAccount() {
+    request
+      .get("/api/accounts/profile/")
+      .withCredentials()
+      .end((err, res) => {
+        if (err) {
+          this.setState({loggedIn: false, user: null});
+        } else {
+          this.setState({loggedIn: true, user: res.body});
+        }
+      });
   }
 
   mapParamsToState(location) {
@@ -59,6 +75,8 @@ export default class App extends Component {
   render() {
     const childProps = {
       ...this.state,
+      onLogin: this.onLogin.bind(this),
+      onLogout: this.onLogout.bind(this),
       onAddQuery: this.onAddQuery.bind(this),
       onRemoveQuery: this.onRemoveQuery.bind(this),
       onChangePeriod: this.onChangePeriod.bind(this),
@@ -68,12 +86,20 @@ export default class App extends Component {
 
     return (
       <div>
-        <Header/>
+        <Header {...childProps}/>
         <main>
           { this.props.children && React.cloneElement(this.props.children, childProps) }
         </main>
       </div>
     );
+  }
+
+  onLogin() {
+    location.href = "/api/accounts/login/";
+  }
+
+  onLogout() {
+    location.href = "/api/accounts/logout/";
   }
 
   onAddQuery(query) {
@@ -129,7 +155,6 @@ export default class App extends Component {
         if (results.some(r => r.count === null)) {
 
           if (times <= 1) {
-            console.log("しばらくお待ちください。");
             this.setState({
               loading: false,
               itemCounts: [],
@@ -160,6 +185,9 @@ export default class App extends Component {
         });
         if (res && res.body && res.body.detail) {
           if (res.statusCode === 429) {
+            const loginLink = this.state.loggedIn ? "" : (
+                <div><a href="/api/accounts/login/">Qiitaアカウントでログイン</a>すると制限が暖和されます。</div>
+            );
             const retryAfter = res.headers["retry-after"];
             this.setState({
               message: (
@@ -169,6 +197,7 @@ export default class App extends Component {
                     {retryAfter < 60 ? retryAfter + "秒" : Math.floor(retryAfter / 60) + "分"}
                     以上待ってください。
                   </div>
+                  { loginLink }
                 </div>
               )
             });

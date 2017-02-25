@@ -8,7 +8,7 @@ class QueryField extends Component {
   static defaultProps = {
     textFieldProps: {
       name: "q",
-      floatingLabelText: "検索クエリー",
+      floatingLabelText: "検索クエリーを追加",
       hintText: "例) tag:python",
     },
     value: "",

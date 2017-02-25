@@ -41,7 +41,7 @@ class Home extends Component {
         <Paper style={styles.paper}>
           <div style={styles.tagline}>
             <h1 style={styles.h1}>QiiTrend</h1>
-            <h2 style={styles.h2}>QiiTrendは、Qiitaの投稿件数の推移を時系列チャートで表示するサービスです。</h2>
+            <h2 style={styles.h2}>QiiTrendは、Qiitaの投稿件数を時系列チャートで表示するサービスです。</h2>
             <div style={styles.search}>
               <div>チャートに表示したい投稿の検索条件を入力してください。</div>
               <SearchField onSubmit={this.props.onAddQuery}/>

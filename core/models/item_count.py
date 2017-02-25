@@ -38,6 +38,10 @@ class ItemCountCacheClient:
             self.cache = redis.from_url(settings.REDIS_URL, settings.REDIS_DB_ITEM_COUNT)
             self.request_queue = redis.from_url(settings.REDIS_URL, settings.REDIS_DB_REQUEST_QUEUE)
             self.executor = ThreadPoolExecutor(max_workers=10)
+            self.flush_request_queue()
+
+    def flush_request_queue(self):
+        self.request_queue.flushdb()
 
     def get(self, query: QiitaSearchQuery, unit: Unit, d: date) -> ItemCount:
         key = self.make_key(query, unit, d)
@@ -59,6 +63,8 @@ class ItemCountCacheClient:
             unit.short_format(d),
             query.query
         )
+
+ItemCountCacheClient().flush_request_queue()
 
 
 def _async_request(key: str, query: QiitaSearchQuery, unit: Unit, d: date):

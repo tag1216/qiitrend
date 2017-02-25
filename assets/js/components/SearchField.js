@@ -40,7 +40,7 @@ class SearchField extends Component {
                    onChange={this.handleChange.bind(this)}
                    onKeyDown={this.handleKeyDown.bind(this)}
                    style={{
-                     width: 300,
+                     width: 200,
                      height: 32,
                      marginTop: 5,
                      borderTopLeftRadius: 16,
@@ -48,14 +48,14 @@ class SearchField extends Component {
                      backgroundColor: "#fff",
                      overflow: "hidden",
                    }}
-                   inputStyle={{ marginLeft: 24}}
+                   inputStyle={{ marginLeft: 16}}
 
         />
         <FlatButton icon={icon}
                     onClick={this.handleClick.bind(this)}
                     backgroundColor={this.props.muiTheme.palette.accent1Color}
                     style={{
-                      minWidth: 48,
+                      minWidth: 32,
                       height: 32,
                       position: "absolute",
                       top: 0,

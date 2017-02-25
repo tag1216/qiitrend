@@ -44,7 +44,8 @@ export default class App extends Component {
     console.log(urlQuery);
     const queries = (typeof urlQuery.query == "string" ? [urlQuery.query] :
                      !urlQuery.query ? [] :
-                     urlQuery.query).map(value => {return {value}});
+                     urlQuery.query).map(value => this.strToQuery(value));
+
     const period = periodItems.find(p => p.unit === urlQuery.unit && "" + p.period === urlQuery.period)
         || periodItems[3];
     const mode = urlQuery.mode || "count";
@@ -76,7 +77,7 @@ export default class App extends Component {
   }
 
   onAddQuery(query) {
-    const queries = this.state.queries.concat([{value: query}]);
+    const queries = this.state.queries.concat([this.strToQuery(query)]);
     this.pushState(queries, this.state.period, this.state.mode);
   }
 
@@ -97,6 +98,13 @@ export default class App extends Component {
     this.setState({
       message: null,
     });
+  }
+
+  strToQuery(query) {
+    return {
+      value: query,
+      label: query === "" ? "(全投稿)" : query,
+    }
   }
 
   pushState(queries, period, mode) {

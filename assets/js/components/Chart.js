@@ -21,7 +21,7 @@ export default class Chart extends Component {
       queries
         .filter(q => q.value === c.query_raw)
         .forEach(q => {
-          dateMap.get(c.date)[q.value] =
+          dateMap.get(c.date)[q.label] =
             mode === "count"
               ? c.count
               : c.count / totalMap.get(c.date) * 100;
@@ -47,7 +47,7 @@ export default class Chart extends Component {
                    labelStyle={{fontSize: 12}}
                    itemStyle={{fontSize: 12, padding: 0}}/>
           {this.props.queries.map((q, i) => (
-            <Line key={q.value} type="monotone" dataKey={q.value} stroke={COLORS(i)} />
+            <Line key={q.label} type="monotone" dataKey={q.label} stroke={COLORS(i)} />
           ))}
         </LineChart>
       </ResponsiveContainer>

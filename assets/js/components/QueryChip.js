@@ -18,7 +18,7 @@ export default class QueryChip extends Component {
         style={styles.chip}
       >
         <Avatar backgroundColor={this.props.color}/>
-        {this.props.query.value}
+        {this.props.query.label}
       </Chip>
     );
   }

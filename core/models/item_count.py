@@ -7,6 +7,7 @@ import redis
 import time
 from django.conf import settings
 
+from core.utils import duration_to_second
 from . import QiitaSearchQuery, Unit
 from .request import request_item_count
 
@@ -80,18 +81,15 @@ def _async_request(key: str, query: QiitaSearchQuery, unit: Unit, d: date):
         cnt = request_item_count(query_with_date)
 
         response_time = time.time() - start
-        logger.info("q:{} response time:{:.3f}"
+        logger.info("q:[{}] response time:{:.3f}"
                     .format(query_with_date.query, response_time))
 
         if ((d + unit.relativedelta(1)) - date.today()).days >= 0:
-            logger.info("{} : COUNT_CACHE_EXPIRE_LAST".format(unit.format(d)))
-            expire = settings.COUNT_CACHE_EXPIRE_LAST
+            expire = duration_to_second(settings.COUNT_CACHE_EXPIRE_LAST)
         elif "stocks:" in query.query:
-            logger.info("{} : COUNT_CACHE_EXPIRE_STOCKS".format(unit.format(d)))
-            expire = settings.COUNT_CACHE_EXPIRE_STOCKS
+            expire = duration_to_second(settings.COUNT_CACHE_EXPIRE_STOCKS)
         else:
-            logger.info("{} : COUNT_CACHE_EXPIRE_DEFAULT".format(unit.format(d)))
-            expire = settings.COUNT_CACHE_EXPIRE_DEFAULT
+            expire = duration_to_second(settings.COUNT_CACHE_EXPIRE_DEFAULT)
 
         cache_client = ItemCountCacheClient()
         cache_client.cache.setex(key, cnt, expire)

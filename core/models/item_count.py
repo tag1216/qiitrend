@@ -51,8 +51,11 @@ class ItemCountCacheClient:
         if cnt is None:
             key = self.make_key(query, unit, d)
             if not self.request_queue.exists(key):
-                self.request_queue.set(key, "")
-                self.executor.submit(_async_request, key, query, unit, d)
+                if settings.QIITA_REQUEST_QUEUE_SIZE <= self.request_queue.dbsize():
+                    logger.info("request queue is full.")
+                else:
+                    self.request_queue.set(key, "")
+                    self.executor.submit(_async_request, key, query, unit, d)
 
         return ItemCount(query, unit, d, cnt)
 

@@ -216,6 +216,7 @@ COUNT_CACHE_EXPIRE = 24 * 60 * 60
 LAST_COUNT_CACHE_EXPIRE = 60 * 60
 
 QIITA_REQUEST_PER_SECOND = 1.0
+QIITA_REQUEST_QUEUE_SIZE = 600
 
 ########################################
 # Admin

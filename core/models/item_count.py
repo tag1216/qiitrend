@@ -63,9 +63,9 @@ class ItemCountCacheClient:
 
 def _async_request(key: str, query: QiitaSearchQuery, unit: Unit, d: date):
 
-    start = time.time()
-
     try:
+        start = time.time()
+
         query_with_date = query + ("created:" + unit.format(d))
 
         cnt = request_item_count(query_with_date)
@@ -85,8 +85,17 @@ def _async_request(key: str, query: QiitaSearchQuery, unit: Unit, d: date):
 
     except Exception:
         logger.exception("qiita request failed.")
+        try:
+            cache_client = ItemCountCacheClient()
+            cache_client.request_queue.delete(key)
+        except Exception:
+            logger.exception("_async_request failed.")
 
-    elapsed_time = time.time() - start
-    time_per_request = 1.0 / settings.QIITA_REQUEST_PER_SECOND
-    if elapsed_time < time_per_request:
-        time.sleep(time_per_request - elapsed_time)
+    finally:
+        try:
+            elapsed_time = time.time() - start
+            time_per_request = 1.0 / settings.QIITA_REQUEST_PER_SECOND
+            if elapsed_time < time_per_request:
+                time.sleep(time_per_request - elapsed_time)
+        except Exception:
+            logger.exception("_async_request failed.")

@@ -9,10 +9,12 @@ import Home from "./components/pages/Home"
 import Trend from "./components/pages/Trend"
 import NotFound from "./components/pages/NotFound"
 
+import muiTheme from "./mui-theme";
+
 injectTapEventPlugin();
 
 ReactDOM.render((
-  <MuiThemeProvider>
+  <MuiThemeProvider muiTheme={muiTheme}>
     <Router history={browserHistory}>
       <Route path="/" component={App}>
         <IndexRoute component={Home}/>

@@ -25,7 +25,8 @@ logger = logging.getLogger(__name__)
 
 
 def index(request):
-    return render(request, 'core/index.html')
+    return render(request, 'core/index.html',
+                  context={'ga_tracking_id': settings.GA_TRACKING_ID})
 
 
 @api_view(["GET", "POST"])

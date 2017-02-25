@@ -1,5 +1,6 @@
 import React, { propTypes } from "react";
 import { Component } from "react";
+import ReactGA from "react-ga";
 import request from 'superagent';
 import url from "url";
 
@@ -95,10 +96,12 @@ export default class App extends Component {
   }
 
   onLogin() {
+    ReactGA.event({category: "user", action: "Login"});
     location.href = "/api/accounts/login/";
   }
 
   onLogout() {
+    ReactGA.event({category: "user", action: "Logout"});
     location.href = "/api/accounts/logout/";
   }
 
@@ -145,7 +148,7 @@ export default class App extends Component {
     });
   }
 
-  fetchItemCounts(queries, period, times = 5, interval = 2000) {
+  fetchItemCounts(queries, period, times = 5, interval = 2000, start = new Date().getTime()) {
 
     this.setState({loading: true});
 
@@ -165,17 +168,25 @@ export default class App extends Component {
                 </div>
               )
             });
-            return;
+            ReactGA.timing({
+              category: "itemcounts",
+              variable: "Too Many Retry",
+              value: new Date().getTime() - start
+            });
+          } else {
+            wait(interval).then(() => this.fetchItemCounts(queries, period, times - 1, interval, start));
           }
-
-          wait(interval).then(() => this.fetchItemCounts(queries, period, times - 1, interval));
-          return;
+        } else {
+          this.setState({
+            loading: false,
+            itemCounts: results,
+          });
+          ReactGA.timing({
+            category: "itemcounts",
+            variable: "success",
+            value: new Date().getTime() - start
+          });
         }
-
-        this.setState({
-          loading: false,
-          itemCounts: results,
-        });
       })
       .catch(results => {
         const {err, res} = results;
@@ -186,7 +197,13 @@ export default class App extends Component {
         if (res && res.body && res.body.detail) {
           if (res.statusCode === 429) {
             const loginLink = this.state.loggedIn ? "" : (
-                <div><a href="/api/accounts/login/">Qiitaアカウントでログイン</a>すると制限が暖和されます。</div>
+                <div>
+                  <a href="/api/accounts/login/"
+                     onClick={() => {ReactGA.event({category: "login", action: "Too Many Requests"}); return true;}}>
+                    Qiitaアカウントでログイン
+                  </a>
+                  すると制限が暖和されます。
+                </div>
             );
             const retryAfter = res.headers["retry-after"];
             this.setState({
@@ -201,6 +218,11 @@ export default class App extends Component {
                 </div>
               )
             });
+            ReactGA.timing({
+              category: "itemcounts",
+              variable: "Too Many Requests",
+              value: new Date().getTime() - start
+            });
           } else {
             this.setState({
               message: (
@@ -210,14 +232,23 @@ export default class App extends Component {
                 </div>
               ),
             });
+            ReactGA.timing({
+              category: "itemcounts",
+              variable: "Server Error",
+              value: new Date().getTime() - start
+            });
           }
         } else {
           this.setState({
-            message: <div>サーバーエラー</div>,
+            message: <div>サーバーに接続できませんでした。</div>,
+          });
+          ReactGA.timing({
+            category: "itemcounts",
+            variable: "Connection Error",
+            value: new Date().getTime() - start
           });
         }
       });
-
   }
 
   requestItemCounts(queries, period) {

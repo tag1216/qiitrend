@@ -221,3 +221,8 @@ QIITA_REQUEST_PER_SECOND = 1.0
 # Admin
 
 ADMIN_URL = os.environ.get('ADMIN_URL', 'adminsite/')
+
+########################################
+# Google Analytics
+
+GA_TRACKING_ID = os.environ.get("GA_TRACKING_ID", "UA-xxxxxx")

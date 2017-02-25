@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import {Router, Route, IndexRoute, browserHistory} from "react-router";
 import MuiThemeProvider from "material-ui/styles/MuiThemeProvider";
 import injectTapEventPlugin from 'react-tap-event-plugin';
+import ReactGA from "react-ga";
 
 import App from "./App"
 import Home from "./components/pages/Home"
@@ -13,9 +14,16 @@ import muiTheme from "./mui-theme";
 
 injectTapEventPlugin();
 
+ReactGA.initialize(GA_TRACKING_ID);
+
+function logPageView() {
+  ReactGA.set({ page: window.location.pathname });
+  ReactGA.pageview(window.location.pathname);
+}
+
 ReactDOM.render((
   <MuiThemeProvider muiTheme={muiTheme}>
-    <Router history={browserHistory}>
+    <Router history={browserHistory} onUpdate={logPageView}>
       <Route path="/" component={App}>
         <IndexRoute component={Home}/>
         <Route path="home" component={Home}/>

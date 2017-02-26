@@ -1,16 +1,15 @@
 import logging
 import threading
+import time
 from concurrent.futures import ThreadPoolExecutor
-from datetime import date, timedelta
+from datetime import date
 
 import redis
-import time
 from django.conf import settings
 
 from core.utils import duration_to_second
 from . import QiitaSearchQuery, Unit
 from .request import request_item_count
-
 
 logger = logging.getLogger(__name__)
 
@@ -35,40 +34,78 @@ class ItemCountCacheClient:
         return cls._instance
 
     def __init__(self):
-        if not hasattr(self, "executor"):
+        if not hasattr(self, "_initialized"):
             self.cache = redis.from_url(settings.REDIS_URL, settings.REDIS_DB_ITEM_COUNT)
-            self.request_queue = redis.from_url(settings.REDIS_URL, settings.REDIS_DB_REQUEST_QUEUE)
-            self.executor = ThreadPoolExecutor(max_workers=settings.QIITA_REQUEST_THREADS)
-            self.flush_request_queue()
-
-    def flush_request_queue(self):
-        self.request_queue.flushdb()
+            self._initialized = True
 
     def get(self, query: QiitaSearchQuery, unit: Unit, d: date) -> ItemCount:
-        key = self.make_key(query, unit, d)
+        key = make_key(query, unit, d)
         value = self.cache.get(key)
         cnt = int(value) if value is not None else None
 
         if cnt is None:
-            key = self.make_key(query, unit, d)
-            if not self.request_queue.exists(key):
-                if settings.QIITA_REQUEST_QUEUE_SIZE <= self.request_queue.dbsize():
-                    logger.info("request queue is full.")
-                else:
-                    self.request_queue.set(key, "")
-                    self.executor.submit(_async_request, key, query, unit, d)
+            RequestQueue().request(key, query, unit, d)
 
         return ItemCount(query, unit, d, cnt)
 
-    @classmethod
-    def make_key(cls, query: QiitaSearchQuery, unit: Unit, d: date) -> str:
-        return "count:{}{}:{}".format(
-            unit.short_name,
-            unit.short_format(d),
-            query.query
-        )
 
-ItemCountCacheClient().flush_request_queue()
+class RequestQueue:
+    _instance = None
+    _lock = threading.Lock()
+
+    def __new__(cls):
+        with cls._lock:
+            if cls._instance is None:
+                cls._instance = super().__new__(cls)
+        return cls._instance
+
+    def __init__(self):
+        if not hasattr(self, "_initialized"):
+            self.request_queue = redis.from_url(settings.REDIS_URL, settings.REDIS_DB_REQUEST_QUEUE)
+            self.executor = ThreadPoolExecutor(max_workers=settings.QIITA_REQUEST_THREADS)
+            self.flush()
+            self._initialized = True
+
+    def flush(self):
+        self.request_queue.flushdb()
+
+    def request(self, key, query, unit, d):
+        if not self.exists(key):
+            if self.is_full():
+                logger.info("request queue is full.")
+            else:
+                self.add(key)
+                self.executor.submit(_async_request, key, query, unit, d)
+
+    def is_full(self) -> bool:
+        return settings.QIITA_REQUEST_QUEUE_SIZE <= self.request_queue.dbsize()
+
+    def exists(self, key: str) -> bool:
+        return self.request_queue.exists(key)
+
+    def add(self, key: str):
+        self.request_queue.set(key, "")
+
+    def remove(self, key: str):
+        self.request_queue.delete(key)
+
+    def _async_request(self, key, query, unit, d):
+        _async_request(key, query, unit, d)
+        try:
+            self.request_queue.delete(key)
+        except:
+            logger.exception("request queue error")
+
+
+RequestQueue().flush()
+
+
+def make_key(query: QiitaSearchQuery, unit: Unit, d: date) -> str:
+    return "count:{}{}:{}".format(
+        unit.short_name,
+        unit.short_format(d),
+        query.query
+    )
 
 
 def _async_request(key: str, query: QiitaSearchQuery, unit: Unit, d: date):
@@ -93,15 +130,9 @@ def _async_request(key: str, query: QiitaSearchQuery, unit: Unit, d: date):
 
         cache_client = ItemCountCacheClient()
         cache_client.cache.setex(key, cnt, expire)
-        cache_client.request_queue.delete(key)
 
     except Exception:
         logger.exception("qiita request failed.")
-        try:
-            cache_client = ItemCountCacheClient()
-            cache_client.request_queue.delete(key)
-        except Exception:
-            logger.exception("_async_request failed.")
 
     finally:
         try:

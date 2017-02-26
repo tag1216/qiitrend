@@ -50,6 +50,7 @@ class ItemCountCacheClient:
 
 
 class RequestQueue:
+    QUEUE_KEY = "queue:"
     _instance = None
     _lock = threading.Lock()
 
@@ -66,33 +67,33 @@ class RequestQueue:
             self.flush()
             self._initialized = True
 
-    def flush(self):
-        self.request_queue.flushdb()
-
     def request(self, key, query, unit, d):
         if not self.exists(key):
             if self.is_full():
                 logger.info("request queue is full.")
             else:
                 self.add(key)
-                self.executor.submit(_async_request, key, query, unit, d)
+                self.executor.submit(self._async_request, key, query, unit, d)
+
+    def flush(self):
+        self.request_queue.delete(self.QUEUE_KEY)
 
     def is_full(self) -> bool:
-        return settings.QIITA_REQUEST_QUEUE_SIZE <= self.request_queue.dbsize()
+        return settings.QIITA_REQUEST_QUEUE_SIZE <= self.request_queue.scard(self.QUEUE_KEY)
 
     def exists(self, key: str) -> bool:
-        return self.request_queue.exists(key)
+        return self.request_queue.sismember(self.QUEUE_KEY, key)
 
     def add(self, key: str):
-        self.request_queue.set(key, "")
+        self.request_queue.sadd(self.QUEUE_KEY, key)
 
     def remove(self, key: str):
-        self.request_queue.delete(key)
+        self.request_queue.srem(self.QUEUE_KEY, key)
 
     def _async_request(self, key, query, unit, d):
         _async_request(key, query, unit, d)
         try:
-            self.request_queue.delete(key)
+            self.remove(key)
         except:
             logger.exception("request queue error")
 

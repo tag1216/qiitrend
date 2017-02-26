@@ -76,6 +76,7 @@ export default class Header extends Component {
     return (
       <header>
         <AppBar {...appBarProps}
+                showMenuIconButton={false}
                 iconElementRight={
                   this.props.loggedIn
                     ? <Logged onItemTouchTap={this.handleItemTouchTap.bind(this)}

@@ -35165,6 +35165,7 @@
 	    value: function checkAccount() {
 	      var _this2 = this;
 
+	      _reactGa2.default.event({ category: "accounts", action: "profile" });
 	      _superagent2.default.get("/api/accounts/profile/").withCredentials().end(function (err, res) {
 	        if (err) {
 	          _this2.setState({ loggedIn: false, user: null });
@@ -35179,7 +35180,6 @@
 	      var _this3 = this;
 
 	      var urlQuery = _url2.default.parse(location.search, true).query;
-	      console.log(urlQuery);
 	      var queries = (typeof urlQuery.query == "string" ? [urlQuery.query] : !urlQuery.query ? [] : urlQuery.query).map(function (value) {
 	        return _this3.strToQuery(value);
 	      });
@@ -35221,13 +35221,13 @@
 	  }, {
 	    key: "onLogin",
 	    value: function onLogin() {
-	      _reactGa2.default.event({ category: "user", action: "Login" });
+	      _reactGa2.default.event({ category: "accounts", action: "Login" });
 	      location.href = "/api/accounts/login/";
 	    }
 	  }, {
 	    key: "onLogout",
 	    value: function onLogout() {
-	      _reactGa2.default.event({ category: "user", action: "Logout" });
+	      _reactGa2.default.event({ category: "accounts", action: "Logout" });
 	      location.href = "/api/accounts/logout/";
 	    }
 	  }, {
@@ -35322,6 +35322,7 @@
 	                )
 	              )
 	            });
+	            _reactGa2.default.event({ category: "message", action: "Too Many Retry" });
 	            _reactGa2.default.timing({
 	              category: "itemcounts",
 	              variable: "Too Many Retry",
@@ -35360,7 +35361,7 @@
 	                "a",
 	                { href: "/api/accounts/login/",
 	                  onClick: function onClick() {
-	                    _reactGa2.default.event({ category: "login", action: "Too Many Requests" });return true;
+	                    _reactGa2.default.event({ category: "accounts", action: "login from dialog" });return true;
 	                  } },
 	                "Qiita\u30A2\u30AB\u30A6\u30F3\u30C8\u3067\u30ED\u30B0\u30A4\u30F3"
 	              ),
@@ -35385,6 +35386,7 @@
 	                loginLink
 	              )
 	            });
+	            _reactGa2.default.event({ category: "message", action: "Too Many Requests" });
 	            _reactGa2.default.timing({
 	              category: "itemcounts",
 	              variable: "Too Many Requests",
@@ -35416,6 +35418,7 @@
 	                )
 	              )
 	            });
+	            _reactGa2.default.event({ category: "message", action: "Server Error" });
 	            _reactGa2.default.timing({
 	              category: "itemcounts",
 	              variable: "Server Error",
@@ -38932,6 +38935,8 @@
 
 	var _materialUi = __webpack_require__(412);
 
+	var _reactGa = __webpack_require__(387);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -38984,6 +38989,11 @@
 	          targetOrigin: { horizontal: 'right', vertical: 'top' },
 	          anchorOrigin: { horizontal: 'right', vertical: 'top' }
 	        }),
+	        _react2.default.createElement(_materialUi.MenuItem, { containerElement: _react2.default.createElement(_reactGa.OutboundLink, { eventLabel: "send form",
+	            to: "https://ssl.form-mailer.jp/fms/d6036533496614",
+	            target: "_blank"
+	          }),
+	          primaryText: "\u3054\u610F\u898B\u30FB\u30D0\u30B0\u5831\u544A" }),
 	        _react2.default.createElement(_materialUi.MenuItem, { value: "logout", primaryText: "\u30ED\u30B0\u30A2\u30A6\u30C8" })
 	      );
 	    }
@@ -39044,6 +39054,7 @@
 	        "header",
 	        null,
 	        _react2.default.createElement(_materialUi.AppBar, _extends({}, appBarProps, {
+	          showMenuIconButton: false,
 	          iconElementRight: this.props.loggedIn ? _react2.default.createElement(Logged, { onItemTouchTap: this.handleItemTouchTap.bind(this),
 	            user: this.props.user }) : _react2.default.createElement(Login, { onClick: this.props.onLogin })
 	        }))

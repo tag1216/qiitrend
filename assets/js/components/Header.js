@@ -1,6 +1,7 @@
 import React, { propTypes } from "react";
 import { Component } from "react";
 import { AppBar, FlatButton, IconMenu, IconButton, MenuItem, Avatar } from "material-ui";
+import { OutboundLink } from "react-ga";
 
 
 class Login extends Component {
@@ -26,6 +27,12 @@ class Logged extends Component {
         targetOrigin={{horizontal: 'right', vertical: 'top'}}
         anchorOrigin={{horizontal: 'right', vertical: 'top'}}
       >
+        <MenuItem containerElement={
+          <OutboundLink eventLabel="send form"
+                        to="https://ssl.form-mailer.jp/fms/d6036533496614"
+                        target="_blank"
+        />}
+                  primaryText="ご意見・バグ報告" />
         <MenuItem value="logout" primaryText="ログアウト" />
       </IconMenu>
     );

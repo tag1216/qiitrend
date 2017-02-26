@@ -38,7 +38,7 @@ class ItemCountCacheClient:
         if not hasattr(self, "executor"):
             self.cache = redis.from_url(settings.REDIS_URL, settings.REDIS_DB_ITEM_COUNT)
             self.request_queue = redis.from_url(settings.REDIS_URL, settings.REDIS_DB_REQUEST_QUEUE)
-            self.executor = ThreadPoolExecutor(max_workers=10)
+            self.executor = ThreadPoolExecutor(max_workers=settings.QIITA_REQUEST_THREADS)
             self.flush_request_queue()
 
     def flush_request_queue(self):

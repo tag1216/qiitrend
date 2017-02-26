@@ -45,7 +45,7 @@ class Home extends Component {
             <div style={styles.search}>
               <div>チャートに表示したい投稿の検索条件を入力してください。</div>
               <SearchField onSubmit={this.props.onAddQuery}/>
-              <div>例) 「tag:python」 「tag:go or tag:golang」 「scocks:>=100」 </div>
+              <div>例) 「tag:python」 「tag:go or tag:golang」 「stocks:>=100」 </div>
               <div>
                 検索方法は <a href="http://qiita.com/search" target="_blank">Qiita</a> と同じです。
                 詳細は <a href="http://help.qiita.com/ja/articles/qiita-search-options" target="_blank">こちら</a> を参照してください。

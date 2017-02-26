@@ -117,6 +117,23 @@ ALLOWED_HOSTS = ['*']
 
 
 ########################################
+# cache
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": os.environ.get("REDIS_URL", "redis://localhost:6379") + "/0",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
+
+
+########################################
 # Log設定
 
 LOGGING = {
@@ -204,9 +221,8 @@ REST_FRAMEWORK = {
 # Redis
 
 REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379")
-REDIS_DB_ITEM_COUNT = 0
-REDIS_DB_REQUEST_QUEUE = 1
-REDIS_STATS = 2
+REDIS_DB_ITEM_COUNT = 1
+REDIS_DB_REQUEST_QUEUE = 2
 
 ########################################
 # Qiitaトレンド

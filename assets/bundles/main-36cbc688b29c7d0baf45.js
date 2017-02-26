@@ -71329,7 +71329,7 @@
 	              _react2.default.createElement(
 	                "div",
 	                null,
-	                "\u4F8B) \u300Ctag:python\u300D \u300Ctag:go or tag:golang\u300D \u300Cscocks:>=100\u300D "
+	                "\u4F8B) \u300Ctag:python\u300D \u300Ctag:go or tag:golang\u300D \u300Cstocks:>=100\u300D "
 	              ),
 	              _react2.default.createElement(
 	                "div",

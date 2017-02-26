@@ -44,6 +44,7 @@ export default class App extends Component {
   }
 
   checkAccount() {
+    ReactGA.event({category: "accounts", action: "profile"});
     request
       .get("/api/accounts/profile/")
       .withCredentials()
@@ -58,7 +59,6 @@ export default class App extends Component {
 
   mapParamsToState(location) {
     const urlQuery = url.parse(location.search, true).query;
-    console.log(urlQuery);
     const queries = (typeof urlQuery.query == "string" ? [urlQuery.query] :
                      !urlQuery.query ? [] :
                      urlQuery.query).map(value => this.strToQuery(value));
@@ -96,12 +96,12 @@ export default class App extends Component {
   }
 
   onLogin() {
-    ReactGA.event({category: "user", action: "Login"});
+    ReactGA.event({category: "accounts", action: "Login"});
     location.href = "/api/accounts/login/";
   }
 
   onLogout() {
-    ReactGA.event({category: "user", action: "Logout"});
+    ReactGA.event({category: "accounts", action: "Logout"});
     location.href = "/api/accounts/logout/";
   }
 
@@ -168,6 +168,7 @@ export default class App extends Component {
                 </div>
               )
             });
+            ReactGA.event({category: "message", action: "Too Many Retry"});
             ReactGA.timing({
               category: "itemcounts",
               variable: "Too Many Retry",
@@ -199,7 +200,7 @@ export default class App extends Component {
             const loginLink = this.state.loggedIn ? "" : (
                 <div>
                   <a href="/api/accounts/login/"
-                     onClick={() => {ReactGA.event({category: "login", action: "Too Many Requests"}); return true;}}>
+                     onClick={() => {ReactGA.event({category: "accounts", action: "login from dialog"}); return true;}}>
                     Qiitaアカウントでログイン
                   </a>
                   すると制限が暖和されます。
@@ -218,6 +219,7 @@ export default class App extends Component {
                 </div>
               )
             });
+            ReactGA.event({category: "message", action: "Too Many Requests"});
             ReactGA.timing({
               category: "itemcounts",
               variable: "Too Many Requests",
@@ -232,6 +234,7 @@ export default class App extends Component {
                 </div>
               ),
             });
+            ReactGA.event({category: "message", action: "Server Error"});
             ReactGA.timing({
               category: "itemcounts",
               variable: "Server Error",

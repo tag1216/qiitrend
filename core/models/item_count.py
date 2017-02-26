@@ -98,9 +98,6 @@ class RequestQueue:
             logger.exception("request queue error")
 
 
-RequestQueue().flush()
-
-
 def make_key(query: QiitaSearchQuery, unit: Unit, d: date) -> str:
     return "count:{}{}:{}".format(
         unit.short_name,

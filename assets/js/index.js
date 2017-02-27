@@ -4,6 +4,7 @@ import {Router, Route, IndexRoute, browserHistory} from "react-router";
 import MuiThemeProvider from "material-ui/styles/MuiThemeProvider";
 import injectTapEventPlugin from 'react-tap-event-plugin';
 import ReactGA from "react-ga";
+import url from "url";
 
 import App from "./App"
 import Home from "./components/pages/Home"
@@ -17,8 +18,12 @@ injectTapEventPlugin();
 ReactGA.initialize(GA_TRACKING_ID);
 
 function logPageView() {
-  ReactGA.set({ page: window.location.pathname });
-  ReactGA.pageview(window.location.pathname);
+  const path = url.format({
+    pathname: location.pathname,
+    search: location.search,
+  });
+  ReactGA.set({ page: path });
+  ReactGA.pageview(path);
 }
 
 ReactDOM.render((

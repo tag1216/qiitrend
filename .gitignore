@@ -8,3 +8,6 @@ db.sqlite3
 staticfiles
 .env
 
+assets/bundles/*
+assets/dist/*
+webpack-stats*.json

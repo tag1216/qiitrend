@@ -62,8 +62,12 @@ export default class Header extends Component {
     };
 
     const appBarProps = {
-      title: <span style={styles.title}>QiiTrend</span>,
-      onTitleTouchTap: () => router.push("/"),
+      title: (
+        <span style={styles.title}
+              onClick={() => router.push("/")}>
+          QiiTrend
+        </span>
+      )
     };
 
     if (isHome) {

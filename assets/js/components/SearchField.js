@@ -32,39 +32,43 @@ class SearchField extends Component {
                     color={this.props.muiTheme.palette.alternateTextColor}/>
     );
     return (
-      <div style={{position: "relative"}}>
-        <TextField name="q"
-                   value={this.state.value}
-                   underlineShow={false}
-                   autoFocus={true}
-                   onChange={this.handleChange.bind(this)}
-                   onKeyDown={this.handleKeyDown.bind(this)}
-                   style={{
-                     width: 200,
-                     height: 32,
-                     marginTop: 5,
-                     borderTopLeftRadius: 16,
-                     borderBottomLeftRadius: 16,
-                     backgroundColor: "#fff",
-                     overflow: "hidden",
-                   }}
-                   inputStyle={{ marginLeft: 16}}
-
-        />
-        <FlatButton icon={icon}
-                    onClick={this.handleClick.bind(this)}
-                    backgroundColor={this.props.muiTheme.palette.accent1Color}
-                    style={{
-                      minWidth: 32,
-                      height: 32,
-                      position: "absolute",
-                      top: 0,
-                      bottom: 0,
-                      margin: "auto",
-                      borderTopRightRadius: 16,
-                      borderBottomRightRadius: 16,
-                    }}
-        />
+      <div style={{
+        width: "100%",
+        height: "100%",
+        textAlign: "left",
+        borderRadius: 16,
+        backgroundColor: "#fff",
+        overflow: "hidden",
+      }}>
+        <div style={{ position: "relative"}}>
+          <TextField name="q"
+                     value={this.state.value}
+                     underlineShow={false}
+                     autoFocus={true}
+                     onChange={this.handleChange.bind(this)}
+                     onKeyDown={this.handleKeyDown.bind(this)}
+                     style={{
+                       marginLeft: 16,
+                       width: "calc(100% - 48px - 16px)",
+                       height: 32,
+                     }}
+                     inputStyle={{
+                     }}
+          />
+          <FlatButton icon={icon}
+                      onClick={this.handleClick.bind(this)}
+                      backgroundColor={this.props.muiTheme.palette.accent1Color}
+                      style={{
+                        minWidth: 48,
+                        height: 32,
+                        position: "absolute",
+                        top: 0,
+                        bottom: 0,
+                        margin: "auto",
+                        borderRadius: 0,
+                      }}
+          />
+        </div>
       </div>
     );
   }

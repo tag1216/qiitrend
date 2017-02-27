@@ -4,6 +4,7 @@ import muiThemeable from 'material-ui/styles/muiThemeable';
 
 import SearchField from "../SearchField";
 
+import { TextField } from "material-ui";
 
 class Home extends Component {
 
@@ -44,7 +45,9 @@ class Home extends Component {
             <h2 style={styles.h2}>QiiTrendは、Qiitaの投稿件数を時系列チャートで表示するサービスです。</h2>
             <div style={styles.search}>
               <div>チャートに表示したい投稿の検索条件を入力してください。</div>
-              <SearchField onSubmit={this.props.onAddQuery}/>
+              <div className="Home-SearchField-container">
+                <SearchField  onSubmit={this.props.onAddQuery}/>
+              </div>
               <div>例) 「tag:python」 「tag:go or tag:golang」 「stocks:>=100」 </div>
               <div>
                 検索方法は <a href="http://qiita.com/search" target="_blank">Qiita</a> と同じです。

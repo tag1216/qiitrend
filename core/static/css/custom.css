@@ -60,3 +60,17 @@ html, body {
     padding: 0 5%;
   }
 }
+
+.Home-SearchField-container {
+  height: 32px;
+  margin: 16px auto;
+}
+@media screen and (min-width:300px) {
+  .Home-SearchField-container {
+    width: 300px;
+  }
+}@media screen and (max-width:299px) {
+  .Home-SearchField-container {
+    width: 100%;
+  }
+}

@@ -237,6 +237,18 @@ QIITA_REQUEST_THREADS = int(os.environ.get("QIITA_REQUEST_THREADS", "10"))
 QIITA_REQUEST_PER_SECOND = float(os.environ.get("QIITA_REQUEST_PER_SECOND", "1.0"))
 QIITA_REQUEST_QUEUE_SIZE = int(os.environ.get("QIITA_REQUEST_QUEUE_SIZE", 600))
 
+ITEMCOUNTS_PARAM_PATTERNS = [
+    dict(unit="monthly", period="4"),
+    dict(unit="monthly", period="13"),
+    dict(unit="monthly", period="25"),
+    dict(unit="yearly", period="4"),
+    dict(unit="yearly", period="6"),
+    dict(unit="yearly", period=None),
+    dict(unit="yearly", period=""),
+    dict(unit="yearly", period="all"),
+]
+ITEMCOUNTS_MAX_QUERIES = 8
+
 ########################################
 # Admin
 

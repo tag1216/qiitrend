@@ -15,7 +15,9 @@ class Trend extends Component {
     return (
       <div>
         <div className="App-form-container">
-          <QueryField onSubmit={this.props.onAddQuery}/>
+          <QueryField onSubmit={this.props.onAddQuery}
+                      disabled={this.props.queries.length >= 7}
+          />
         </div>
         {this.props.queries.length === 0 || this.props.loading ? null : (
           <div className="App-chart-container">

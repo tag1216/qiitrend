@@ -87,26 +87,27 @@ class ItemCountsView(APIView):
 
         try:
             unit = request.GET.get("unit")
-            if unit is None:
-                raise ParseError("parameter unit is required.")
-            if not hasattr(Unit, unit):
-                raise ParseError("parameter unit is not valid.")
+            period = request.GET.get("period")
+
+            if not is_valid_params(unit, period):
+                raise ParseError("parameter is not valid.")
+
             unit = Unit[unit]
 
             today = date.today()
             last = unit.truncate(today)
 
-            period = request.GET.get("period")
-            if period and not re.match(r"[0-9]+", period):
-                raise ParseError("parameter period is not valid.")
-            if period:
-                first = last - unit.relativedelta(int(period) - 1)
-            else:
+            if period == "all" or period == "" or period is None:
                 first = unit.truncate(settings.QIITA_MIN_DATE)
+            else:
+                first = last - unit.relativedelta(int(period) - 1)
 
             item_counts = []
 
             queries = request.GET.getlist("query")
+            if settings.ITEMCOUNTS_MAX_QUERIES < len(queries):
+                raise ParseError("too many queries.")
+
             for query_raw in queries:
 
                 query = QiitaSearchQuery.parse(query_raw)
@@ -128,6 +129,10 @@ class ItemCountsView(APIView):
         except Exception as e:
             logger.exception(e)
             raise APIException("System Error")
+
+
+def is_valid_params(unit, period):
+    return dict(unit=unit, period=period) in settings.ITEMCOUNTS_PARAM_PATTERNS
 
 
 class ItemCountListView(APIView):

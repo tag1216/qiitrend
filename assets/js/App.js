@@ -229,8 +229,8 @@ export default class App extends Component {
             this.setState({
               message: (
                 <div>
-                  <div><span>{results.statusCode}</span><span>{results.statusText}</span></div>
-                  <div>{results.detail}</div>
+                  <div><span>{res.statusCode}</span><span>{res.statusText}</span></div>
+                  <div>{res.body.detail}</div>
                 </div>
               ),
             });
